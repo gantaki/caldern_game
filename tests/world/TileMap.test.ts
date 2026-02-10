@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TileMap, type TileMapData } from '@/world/TileMap';
+import { TILE_SIZE } from '@/config/constants';
 
 function createSimpleMap(width: number, height: number, solidTiles: [number, number][]): TileMap {
   const collision = new Array(width * height).fill(0);
@@ -20,8 +21,8 @@ function createSimpleMap(width: number, height: number, solidTiles: [number, num
 describe('TileMap', () => {
   it('reports correct pixel dimensions', () => {
     const map = createSimpleMap(10, 8, []);
-    expect(map.pixelWidth).toBe(160);
-    expect(map.pixelHeight).toBe(128);
+    expect(map.pixelWidth).toBe(10 * TILE_SIZE);
+    expect(map.pixelHeight).toBe(8 * TILE_SIZE);
   });
 
   it('detects solid tiles', () => {
@@ -40,15 +41,18 @@ describe('TileMap', () => {
 
   it('converts pixel to tile coords', () => {
     const map = createSimpleMap(10, 10, []);
-    expect(map.pixelToTile(24, 48)).toEqual({ tx: 1, ty: 3 });
+    // 3 * TILE_SIZE = 24 when TILE_SIZE=8, so pixel 24 -> tile 3
+    expect(map.pixelToTile(3 * TILE_SIZE, 6 * TILE_SIZE)).toEqual({ tx: 3, ty: 6 });
     expect(map.pixelToTile(0, 0)).toEqual({ tx: 0, ty: 0 });
   });
 
   it('detects rect overlap with solid tiles', () => {
     const map = createSimpleMap(10, 10, [[3, 3]]);
-    // Rect overlapping tile (3,3) which is at pixels (48,48)-(64,64)
-    expect(map.rectOverlapsSolid(50, 50, 8, 8)).toBe(true);
+    // Tile (3,3) is at pixels (3*TS, 3*TS) to (4*TS, 4*TS)
+    const px = 3 * TILE_SIZE + 2;
+    const py = 3 * TILE_SIZE + 2;
+    expect(map.rectOverlapsSolid(px, py, 4, 4)).toBe(true);
     // Rect not overlapping any solid
-    expect(map.rectOverlapsSolid(0, 0, 8, 8)).toBe(false);
+    expect(map.rectOverlapsSolid(0, 0, 4, 4)).toBe(false);
   });
 });

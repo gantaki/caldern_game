@@ -1,87 +1,87 @@
-# Люмбритовые шахты Кальдерна — Game Plan
+# The Lumbrite Mines of Caldern — Game Plan
 
-## 1. Концепция
+## 1. Concept
 
-**Жанр:** 2D exploration / story-driven adventure с элементами horror
-**Визуальные ориентиры:** Celeste (пиксель-арт, чистота анимаций), Noita (атмосфера подземелья, частицы, освещение)
-**Нарративные ориентиры:** Hollow Knight (масштаб мира, environmental storytelling), SOMA (тихий ужас, философия), Darkest Dungeon (давление среды на разум), Disco Elysium (глубокие NPC, политика, упадок)
-**Тон:** Холод, темнота, клаустрофобия. Красота в распаде. NPC, которые держатся за остатки нормальности в ненормальном месте. Финал — не босс, а понимание.
+**Genre:** 2D exploration / story-driven adventure with horror elements
+**Visual references:** Celeste (pixel art, clean animations), Noita (dungeon atmosphere, particles, lighting)
+**Narrative references:** Hollow Knight (world scale, environmental storytelling), SOMA (quiet horror, philosophy), Darkest Dungeon (environmental pressure on the mind), Disco Elysium (deep NPCs, politics, decay)
+**Tone:** Cold, dark, claustrophobic. Beauty in decay. NPCs clinging to remnants of normalcy in an abnormal place. The ending is not a boss — it's understanding.
 
-### Сеттинг
+### Setting
 
-Кальдерн — подземный город-шахта, некогда процветавший центр добычи **люмбрита** — редчайшей руды, которая являлась уникальным источником энергии (аналог Специи из Дюны). Город привлекал тысячи людей. Но руда истощалась, шахты уходили всё глубже, логистика дорожала. Рабочие годами не видели солнца. Люмбрит излучал странную энергию — физически и психически менявшую людей. Безумие, деспотизм начальников, бунты, обрушения. За последние 10-20 лет большая часть города заброшена. На верхних уровнях ещё добывают крупицы люмбрита для чёрного рынка.
+Caldern is an underground mine-city, once a thriving center for extracting **lumbrite** — an extremely rare ore that served as a unique energy source (analogous to Spice from Dune). The city attracted thousands of people. But the ore was depleting, mines went deeper, logistics got more expensive. Workers hadn't seen sunlight in years. Lumbrite emitted a strange energy — changing people physically and mentally. Madness, despotism of overseers, riots, cave-ins. Over the last 10-20 years, most of the city has been abandoned. On the upper levels, they still mine scraps of lumbrite for the black market.
 
-**Люмбрит (Lumbrite)** — от "lumen" (свет) + "umbra" (тень). Светится холодным светом в темноте. Источник энергии для паровых механизмов Кальдерна. При длительном воздействии меняет людей — физически и психически. Чем глубже залежи, тем ярче свечение и сильнее воздействие. На самом дне люмбрит слепит.
+**Lumbrite** — from "lumen" (light) + "umbra" (shadow). Glows with cold light in the dark. Energy source for Caldern's steam mechanisms. Prolonged exposure changes people — physically and mentally. The deeper the deposits, the brighter the glow and stronger the effect. At the very bottom, lumbrite is blinding.
 
-### Стимпанк-элементы
+### Steampunk Elements
 
-- Паровые лифты между уровнями (некоторые работают, некоторые нужно чинить)
-- Пневмопочта — старая система сообщений. Игрок находит застрявшие капсулы с письмами (лор + квестовые предметы)
-- Паровые вентиляционные системы — обеспечивали воздух на нижних уровнях, многие сломаны
-- Люмбритовые генераторы — руда как топливо для паровых машин. На нижних уровнях генераторы всё ещё работают, питаемые жилами в стенах. Заброшенный завод, в котором машины крутятся сами по себе
+- Steam elevators between levels (some work, some need repair)
+- Pneumatic mail — old messaging system. Player finds stuck capsules with letters (lore + quest items)
+- Steam ventilation systems — supplied air to lower levels, many are broken
+- Lumbrite generators — ore as fuel for steam machines. On lower levels, generators still run, powered by veins in the walls. An abandoned factory where machines spin on their own
 
-### Структура мира (вертикальная)
+### World Structure (vertical)
 
-**Верхние уровни — «Край»**
-Ещё живые, полулегальные. Чёрный рынок люмбрита, бары, торговцы снаряжением, бывшие шахтёры, которые не смогли уйти. Паровые лифты ещё работают, но ненадёжно. Первые зацепки о гуманитарной группе.
+**Upper levels — "The Edge"**
+Still alive, semi-legal. Black market for lumbrite, bars, equipment traders, former miners who couldn't leave. Steam elevators still work, but unreliably. First clues about the humanitarian group.
 
-**Средние уровни — «Хребет»**
-Заброшенные жилые кварталы, мастерские, паровые станции. Школы, больницы, парки с люмбритовыми лампами. Пусто, но видны следы жизни. Отшельники. Следы гуманитарной миссии — граффити, записки, лагеря.
+**Middle levels — "The Spine"**
+Abandoned residential quarters, workshops, steam stations. Schools, hospitals, parks with lumbrite lamps. Empty, but signs of life remain. Hermits. Traces of the humanitarian mission — graffiti, notes, camps.
 
-**Нижние уровни — «Кишки»**
-Промышленные зоны, шахты, перерабатывающие заводы. Затопленные тоннели, обрушения, баррикады от бунтов. Люмбрит в стенах светится сильнее. Люди здесь изменены — не монстры, но и не те, кем были. Своя логика, своя «правда».
+**Lower levels — "The Guts"**
+Industrial zones, mines, processing plants. Flooded tunnels, cave-ins, barricades from riots. Lumbrite in the walls glows brighter. People here are changed — not monsters, but not who they used to be. Their own logic, their own "truth."
 
-**Дно — «Корень»**
-Никто не знает, что там. Старые карты обрываются. Люмбрит слепит. Воздействие на максимуме. Здесь нет ответа — есть вопрос. Как в концовке «Космической одиссеи»: что-то непонятное, что заставляет переосмыслить всё, что было до этого. Никакого фэнтези — только ощущение чего-то за пределами понимания.
+**The Bottom — "The Root"**
+Nobody knows what's there. Old maps end. Lumbrite is blinding. Maximum exposure. There is no answer here — only a question. Like the ending of "2001: A Space Odyssey": something incomprehensible that forces you to rethink everything that came before. No fantasy — just the sensation of something beyond understanding.
 
-### Сюжет
+### Story
 
-Главный герой — расследователь со спелеологическим опытом. Однажды уже спускался в Кальдерн, но не дальше средних уровней. Нанят состоятельным человеком: найти его дочь, которая пару лет назад спустилась с группой гуманитарной помощи и пропала. Отец отчасти потерял надежду, но хочет узнать, что случилось, и если получится — найти тело.
+The protagonist is an investigator with spelunking experience. He once descended into Caldern, but no further than the middle levels. Hired by a wealthy man: find his daughter, who went down a couple of years ago with a humanitarian aid group and disappeared. The father has partly lost hope but wants to know what happened, and if possible — find the body.
 
-Игра — расследование. По пути вниз раскрываются: история бунтов, жизнь в городе, истории NPC (почему они всё ещё здесь, ностальгия по былому). Темы: отношения, тяжёлые выборы, деспотизм, эксплуатация.
+The game is an investigation. On the way down, the story unfolds: the history of riots, life in the city, NPC stories (why they're still here, nostalgia for the past). Themes: relationships, hard choices, despotism, exploitation.
 
-### Люмбритовое воздействие (геймплей)
+### Lumbrite Exposure (gameplay)
 
-Не HP-бар, а атмосферный инструмент. Чем глубже и дольше рядом с люмбритом — тем сильнее эффекты: визуальные искажения, изменение палитры, возможно галлюцинации (NPC, которые говорят странное — реальны ли они?). Ближе к Darkest Dungeon stress, но мягче и нарративнее.
-
----
-
-## 2. Технический стек
-
-| Компонент | Технология | Версия | Почему |
-|-----------|-----------|--------|--------|
-| Язык | TypeScript | 5.x | Строгая типизация, лучшая поддержка AI-агентом |
-| Рендер | PixiJS | v8 | WebGL, быстрый, зрелый. Только рендер, без навязанной архитектуры |
-| Сборка | Vite | 6.x | HMR, быстрый dev-сервер, простая конфигурация |
-| Тесты | Vitest | latest | Нативная интеграция с Vite, быстрые, TypeScript из коробки |
-| Линтер | ESLint + Prettier | latest | Единый стиль кода |
-| Десктоп | Tauri | v2 | Для Steam-билда. 5-15MB вместо 150MB+ Electron |
-| CI | GitHub Actions | — | Автотесты на каждый push |
-
-### Принцип: PixiJS — только рендер
-
-PixiJS используется исключительно как графическая библиотека. Вся игровая логика — в собственном коде:
-- Game loop (свой)
-- Система сущностей (своя, простая, не полноценный ECS)
-- Камера (своя)
-- Коллизии (свои, AABB для тайлов)
-- Тайлмап-система (своя)
-- Диалоговая система (своя)
-- Система сохранений (своя, IndexedDB)
-- Input-менеджер (свой)
-- Audio-менеджер (Web Audio API / Howler.js)
-
-**Почему не Phaser:** Phaser навязывает архитектуру (Scene-based), скрывает внутреннее состояние, создаёт «магические» баги. AI-агент эффективнее работает с кодом, который сам написал. Каждая строчка понятна, каждая строчка изменяема.
+Not an HP bar, but an atmospheric tool. The deeper and longer near lumbrite — the stronger the effects: visual distortions, palette changes, possible hallucinations (NPCs who say strange things — are they real?). Closer to Darkest Dungeon stress, but softer and more narrative-driven.
 
 ---
 
-## 3. Архитектура проекта
+## 2. Tech Stack
 
-### Структура директорий
+| Component | Technology | Version | Why |
+|-----------|-----------|---------|-----|
+| Language | TypeScript | 5.x | Strict typing, best AI-agent support |
+| Renderer | PixiJS | v8 | WebGL, fast, mature. Rendering only, no imposed architecture |
+| Bundler | Vite | 6.x | HMR, fast dev server, simple config |
+| Testing | Vitest | latest | Native Vite integration, fast, TypeScript out of the box |
+| Linter | ESLint + Prettier | latest | Consistent code style |
+| Desktop | Tauri | v2 | For Steam builds. 5-15MB instead of 150MB+ Electron |
+| CI | GitHub Actions | — | Auto-tests on every push |
+
+### Principle: PixiJS is rendering only
+
+PixiJS is used exclusively as a graphics library. All game logic is in our own code:
+- Game loop (custom)
+- Entity system (custom, simple, not a full ECS)
+- Camera (custom)
+- Collisions (custom, AABB for tiles)
+- Tilemap system (custom)
+- Dialogue system (custom)
+- Save system (custom, IndexedDB)
+- Input manager (custom)
+- Audio manager (Web Audio API)
+
+**Why not Phaser:** Phaser imposes architecture (Scene-based), hides internal state, creates "magic" bugs. AI agent works more effectively with code it wrote itself. Every line is understandable, every line is changeable.
+
+---
+
+## 3. Project Architecture
+
+### Directory Structure
 
 ```
 caldern/
-├── gameplan.md                  # Этот файл — полный план разработки
+├── gameplan.md                  # This file — full development plan
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
@@ -89,148 +89,77 @@ caldern/
 ├── index.html
 │
 ├── src/
-│   ├── main.ts                  # Точка входа, инициализация
+│   ├── main.ts                  # Entry point, initialization
 │   │
-│   ├── core/                    # Ядро движка (переиспользуемое)
-│   │   ├── Game.ts              # Game loop, тайминг, состояния
-│   │   ├── Scene.ts             # Базовый класс сцены
-│   │   ├── SceneManager.ts      # Переключение сцен, lifecycle
-│   │   ├── Camera.ts            # 2D камера, следование, зоны, тряска
+│   ├── core/                    # Engine core (reusable)
+│   │   ├── Game.ts              # Game loop, timing, states
+│   │   ├── Camera.ts            # 2D camera, follow, zones, shake
 │   │   ├── InputManager.ts      # Keyboard + Gamepad, rebindable actions
-│   │   ├── AudioManager.ts      # Music, SFX, ambient, crossfade
-│   │   ├── AssetLoader.ts       # Загрузка и кэширование ассетов
-│   │   ├── SaveManager.ts       # IndexedDB, автосохранение, слоты
-│   │   └── EventBus.ts          # Глобальная шина событий (typed)
+│   │   └── EventBus.ts          # Global typed event bus
 │   │
-│   ├── physics/                 # Физика и коллизии
-│   │   ├── CollisionSystem.ts   # AABB коллизии с тайлмапом
-│   │   ├── Body.ts              # Физическое тело (позиция, скорость, гравитация)
-│   │   └── Raycaster.ts         # Лучи для платформинга и line-of-sight
+│   ├── physics/                 # Physics and collisions
+│   │   ├── CollisionSystem.ts   # AABB collisions with tilemap
+│   │   └── Body.ts              # Physics body (position, velocity, gravity)
 │   │
-│   ├── world/                   # Мир и тайлы
-│   │   ├── TileMap.ts           # Загрузка, рендер, коллизии тайлмапа
-│   │   ├── Chunk.ts             # Чанк мира (для больших уровней)
-│   │   ├── ChunkManager.ts      # Загрузка/выгрузка чанков вокруг камеры
-│   │   ├── Layer.ts             # Слой тайлмапа
-│   │   ├── Zone.ts              # Триггер-зоны (переходы, события, ambient)
-│   │   └── Parallax.ts          # Параллакс-слои для фона
+│   ├── world/                   # World and tiles
+│   │   └── TileMap.ts           # Tilemap data, collisions, coordinate helpers
 │   │
-│   ├── entities/                # Игровые сущности
-│   │   ├── Entity.ts            # Базовая сущность
-│   │   ├── Player.ts            # Игрок: движение, анимации, инвентарь
-│   │   ├── NPC.ts               # NPC: диалоги, расписание, состояния
-│   │   ├── InteractiveObject.ts # Рычаги, двери, пневмопочта, лифты
-│   │   └── EntityManager.ts     # Управление всеми сущностями в сцене
+│   ├── entities/                # Game entities
+│   │   ├── Player.ts            # Player: movement, climbing, rope traversal
+│   │   ├── NPC.ts               # NPC: position, dialogue lines, interaction
+│   │   ├── InteractiveObject.ts # Base class for interactive world objects
+│   │   ├── SteamElevator.ts     # Vertical steam-powered platform
+│   │   ├── Ladder.ts            # Vertical ladder (climb up/down)
+│   │   └── Rope.ts              # Horizontal rope (traverse left/right)
 │   │
-│   ├── dialogue/                # Диалоговая система
-│   │   ├── DialogueManager.ts   # Показ диалогов, выборы, ветвление
-│   │   ├── DialogueParser.ts    # Парсинг диалоговых файлов
-│   │   └── DialogueUI.ts        # UI диалогового окна
+│   ├── dialogue/                # Dialogue system
+│   │   └── DialogueManager.ts   # Text overlay display + input handling
 │   │
-│   ├── narrative/               # Нарративные системы
-│   │   ├── QuestManager.ts      # Квесты, цели, прогресс
-│   │   ├── JournalManager.ts    # Журнал расследования
-│   │   ├── LoreItem.ts          # Записки, письма, документы
-│   │   └── FlagSystem.ts        # Глобальные флаги состояния мира
+│   ├── audio/                   # Sound
+│   │   └── AmbientMusic.ts      # Procedural ambient music (Web Audio API)
 │   │
-│   ├── effects/                 # Визуальные эффекты
-│   │   ├── ParticleSystem.ts    # Частицы (пыль, пар, искры, люмбрит)
-│   │   ├── LightingSystem.ts    # Динамическое освещение
-│   │   ├── LumbritEffect.ts     # Эффекты воздействия люмбрита
-│   │   ├── ShaderManager.ts     # Пост-обработка, distortion, color grading
-│   │   └── WeatherSystem.ts     # Капли воды, пар, пыль в воздухе
+│   ├── config/                  # Configuration
+│   │   └── constants.ts         # Global constants
 │   │
-│   ├── ui/                      # Интерфейс
-│   │   ├── HUD.ts               # Минимальный HUD
-│   │   ├── InventoryUI.ts       # Инвентарь
-│   │   ├── MapUI.ts             # Карта (заполняется по мере исследования)
-│   │   ├── MenuUI.ts            # Главное меню, пауза, настройки
-│   │   └── UIManager.ts         # Управление слоями UI
-│   │
-│   ├── rendering/               # Обёртка над PixiJS
-│   │   ├── Renderer.ts          # Инициализация PixiJS, управление stage
-│   │   ├── SpriteSheet.ts       # Работа с атласами спрайтов
-│   │   ├── AnimationPlayer.ts   # Покадровые анимации
-│   │   └── RenderLayers.ts      # Z-ordering: bg -> tiles -> entities -> fg -> lighting -> UI
-│   │
-│   ├── audio/                   # Звук
-│   │   ├── MusicManager.ts      # Фоновая музыка, кроссфейды между зонами
-│   │   ├── AmbientManager.ts    # Ambient-звуки (капли, скрежет, эхо, гул машин)
-│   │   └── SFXManager.ts        # Звуковые эффекты
-│   │
-│   ├── data/                    # Статические данные
-│   │   ├── npcs/                # JSON-файлы NPC
-│   │   ├── quests/              # JSON-файлы квестов
-│   │   ├── items/               # JSON-файлы предметов
-│   │   ├── maps/                # Данные тайлмапов (JSON, экспорт из Tiled)
-│   │   └── lore/                # Тексты записок, писем, документов
-│   │
-│   ├── config/                  # Конфигурация
-│   │   ├── constants.ts         # Глобальные константы
-│   │   ├── controls.ts          # Маппинг клавиш
-│   │   └── settings.ts          # Пользовательские настройки
-│   │
-│   └── utils/                   # Утилиты
-│       ├── math.ts              # Вектора, интерполяция, случайные числа
-│       ├── spatial.ts           # Spatial hash / grid для оптимизации
-│       └── debug.ts             # Debug overlay, FPS, hitbox визуализация
+│   └── utils/                   # Utilities
+│       ├── math.ts              # Vectors, interpolation, random numbers
+│       └── DebugPanel.ts        # Debug overlay (F3)
 │
-├── assets/                      # Ассеты (спрайты, звуки, музыка)
-│   ├── sprites/
-│   ├── tilesets/
-│   ├── music/
-│   ├── sfx/
-│   └── ambient/
-│
-├── tests/                       # Тесты (зеркалят структуру src/)
-│
-├── tools/                       # Утилиты разработки
-│   ├── map-validator.ts
-│   └── asset-pipeline.ts
-│
+├── assets/                      # Assets (sprites, sounds, music)
+├── tests/                       # Tests (mirror src/ structure)
 └── docs/
-    ├── design.md
-    ├── art-guide.md
-    └── narrative-outline.md
+    └── design.md
 ```
 
-### Ключевые архитектурные решения
+### Key Architectural Decisions
 
-**1. Game Loop — фиксированный timestep для физики, интерполяция для рендера**
+**1. Game Loop — fixed timestep for physics, interpolation for rendering**
 
 ```
 while (accumulator >= FIXED_DT) {
-    update(FIXED_DT)     // Физика, логика — детерминированно
+    update(FIXED_DT)     // Physics, logic — deterministic
     accumulator -= FIXED_DT
 }
-render(accumulator / FIXED_DT)  // Интерполяция для плавности
+render(accumulator / FIXED_DT)  // Interpolation for smoothness
 ```
 
-**2. Сцены — простые контейнеры, не фреймворк**
+**2. Data — JSON, editable by AI agent**
 
-Сцена = набор систем + набор сущностей + данные уровня. SceneManager переключает между ними. Без магии, без lifecycle-хуков кроме `init()`, `update(dt)`, `destroy()`.
+All game data (NPCs, dialogues, quests, maps) are JSON files with TypeScript types for validation.
 
-**3. Данные — JSON, редактируемые AI-агентом**
+**3. Lighting — darkness mask**
 
-Все игровые данные (NPC, диалоги, квесты, карты) — JSON-файлы с TypeScript-типами для валидации. AI-агент может генерировать и редактировать контент напрямую, без визуального редактора.
+The entire screen is dark by default. Light sources punch "holes" in the mask via multiply blend.
 
-**4. Карты — Tiled JSON + кастомный загрузчик**
+**4. Interactive Objects — composition-based**
 
-Tiled Map Editor для дизайна уровней. Кастомный загрузчик читает JSON и создаёт тайлмап + коллизии + зоны. AI-агент может генерировать карты программно для прототипирования.
-
-**5. Освещение — маска темноты**
-
-Весь экран по умолчанию тёмный. Источники света (фонарь игрока, люмбритовые жилы, лампы) рисуют «дыры» в маске через multiply blend.
-
-**6. Chunk-based мир**
-
-Мир разбит на чанки. ChunkManager загружает/выгружает чанки вокруг камеры.
+All world objects (elevators, ladders, ropes) extend a common `InteractiveObject` base class with AABB overlap detection, per-type `update()` and `render()` methods, and interaction hooks.
 
 ---
 
-## 4. AI-агент: инструкции и конвенции
+## 4. AI Agent: Instructions and Conventions
 
-### Команды
+### Commands
 
 ```bash
 npm run dev          # Start dev server (port 3000)
@@ -239,7 +168,7 @@ npm run test:watch   # Tests in watch mode
 npm run build        # Production build
 ```
 
-### Ключевые паттерны
+### Key Patterns
 
 - Composition over inheritance
 - EventBus for cross-system communication (typed)
@@ -247,16 +176,16 @@ npm run build        # Production build
 - Fixed timestep physics (60Hz), variable render
 - Camera: smooth follow with bounds clamping
 
-### Именование
+### Naming
 
-- Файлы: `PascalCase.ts` для классов, `camelCase.ts` для утилит
-- Классы: `PascalCase`
-- Методы/переменные: `camelCase`
-- Константы: `UPPER_SNAKE_CASE`
-- Типы/интерфейсы: `PascalCase`, интерфейсы без префикса `I`
-- JSON данные: `kebab-case.json`
+- Files: `PascalCase.ts` for classes, `camelCase.ts` for utilities
+- Classes: `PascalCase`
+- Methods/variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Types/interfaces: `PascalCase`, no `I` prefix for interfaces
+- JSON data: `kebab-case.json`
 
-### TypeScript строгость
+### TypeScript Strictness
 
 ```json
 {
@@ -269,24 +198,22 @@ npm run build        # Production build
 }
 ```
 
-### Игровые заметки для агента
+### Game-Specific Notes
 
-**Освещение:**
+**Lighting:**
 - Screen is dark by default (multiply blend mask)
 - Light sources punch "holes" in darkness
 - Player has a lantern (warm light)
 - Lumbrite veins emit cold blue light
-- Deeper levels = darker ambient
 
-**Коллизии:**
+**Collisions:**
 - AABB only, no pixel-perfect
 - Separate X/Y resolution for clean corners
 - Coyote time + jump buffer for responsive platforming
 
 **TileMap:**
 - Layers: collision, background, foreground, lumbrite
-- 16x16 pixel tiles
-- Will switch to Tiled JSON format later
+- 8x8 pixel tiles (fine resolution)
 
 **PixiJS v8 API:**
 - `Application.init()` is async
@@ -297,130 +224,89 @@ npm run build        # Production build
 
 ---
 
-## 5. Цикл разработки (AI-first)
+## 5. Development Cycle (AI-first)
 
 ```
-1. Описать задачу агенту (текст)
-2. Агент пишет/меняет код + тесты
-3. Агент запускает тесты (vitest --run)
-4. Если тесты зелёные -> запуск и визуальная проверка (npm run dev)
-5. Если нужны правки -> описание -> повтор
+1. Describe the task to the agent (text)
+2. Agent writes/modifies code + tests
+3. Agent runs tests (vitest --run)
+4. If tests green -> run and visually verify (npm run dev)
+5. If adjustments needed -> describe what's wrong -> repeat
 ```
 
-### Тестирование
+---
 
-**Автоматически (агент запускает сам):**
-- Физика и коллизии
-- Система квестов и флагов
-- Парсинг диалогов
-- Загрузка/сохранение
-- Генерация/валидация карт
-- Все утилиты
+## 6. Development Phases
 
-**Визуально (ты смотришь):**
-- Анимации и переходы
-- Освещение и эффекты
-- Тайминг диалогов
-- Общее ощущение от управления
-- Атмосфера
+**Phase 1 — Engine Core**
+- [x] Game loop + renderer (PixiJS init)
+- [x] Tilemap loading and rendering
+- [x] Player: movement, gravity, tile collisions
+- [x] Camera with smooth follow
+- [x] Input (keyboard)
+- [x] Basic lighting (darkness mask + lantern)
+- [x] Debug panel (F3: full lighting, no-gravity fly mode)
+- [x] Procedural ambient music (Web Audio API)
+- [x] Interactive objects: steam elevator, ladder, rope
+- [x] NPC with dialogue system
+
+**Phase 2 — World and Navigation**
+- [ ] Chunk-based loading
+- [ ] Parallax backgrounds
+- [ ] Zone transitions between locations
+- [ ] Map (fog-of-war, fills in during exploration)
+- [ ] Save system
+
+**Phase 3 — NPCs and Dialogues (expanded)**
+- [ ] NPC sprites and idle animations
+- [ ] Dialogue system with choices and branching
+- [ ] Investigation journal
+- [ ] Quest and flag system
+- [ ] Pneumatic mail and notes (lore)
+
+**Phase 4 — Atmosphere and Effects**
+- [ ] Particles (dust, steam, drops, sparks)
+- [ ] Lumbrite glow in walls
+- [ ] Ambient sounds per zone
+- [ ] Music with crossfades
+- [ ] Lumbrite exposure (visual distortions)
+- [ ] Post-processing (vignette, color grading by depth)
+
+**Phase 5 — Content (main volume)**
+- [ ] Design all locations in Tiled
+- [ ] All NPCs, dialogues, quests
+- [ ] Storyline: the daughter investigation
+- [ ] Lore: letters, notes, graffiti, documents
+- [ ] Unique mechanics per zone
+- [ ] Finale — "The Root"
+
+**Phase 6 — Polish and Release**
+- [ ] Tauri build for Steam
+- [ ] Steam integration (achievements, cloud saves)
+- [ ] Balance, QA
+- [ ] Demo for Steam Next Fest
+- [ ] Trailer, Steam page, marketing
 
 ---
 
-## 6. Фазы разработки
+## 7. Deployment
 
-**Фаза 1 — Ядро движка**
-- [x] Game loop + рендер (PixiJS init)
-- [x] Тайлмап загрузка и рендер
-- [x] Игрок: движение, гравитация, коллизии с тайлами
-- [x] Камера с плавным следованием
-- [x] Input (клавиатура)
-- [x] Базовое освещение (маска темноты + фонарь)
-- Результат: персонаж ходит по тестовому уровню в темноте с фонарём
-
-**Фаза 2 — Мир и навигация**
-- [ ] Chunk-based загрузка
-- [ ] Параллакс-фон
-- [ ] Зоны-переходы между локациями
-- [ ] Паровые лифты (интерактивные объекты)
-- [ ] Карта (fog-of-war, заполняется при исследовании)
-- [ ] Система сохранений
-- Результат: можно перемещаться между уровнями Кальдерна
-
-**Фаза 3 — NPC и диалоги**
-- [ ] NPC: спрайты, idle-анимации, зона взаимодействия
-- [ ] Диалоговая система с выборами
-- [ ] Журнал расследования
-- [ ] Система квестов и флагов
-- [ ] Пневмопочта и записки (лор)
-- Результат: можно разговаривать с NPC, получать квесты, собирать лор
-
-**Фаза 4 — Атмосфера и эффекты**
-- [ ] Частицы (пыль, пар, капли, искры)
-- [ ] Люмбритовое свечение в стенах
-- [ ] Ambient-звуки по зонам
-- [ ] Музыка с кроссфейдами
-- [ ] Люмбритовое воздействие (визуальные искажения)
-- [ ] Пост-обработка (виньетка, color grading по глубине)
-- Результат: атмосфера Кальдерна ощущается
-
-**Фаза 5 — Контент (основной объём)**
-- [ ] Дизайн всех локаций в Tiled
-- [ ] Все NPC, диалоги, квесты
-- [ ] Сюжетная линия расследования дочери
-- [ ] Лор: письма, записки, граффити, документы
-- [ ] Уникальные механики по зонам
-- [ ] Финал — «Корень»
-
-**Фаза 6 — Полировка и релиз**
-- [ ] Tauri-сборка для Steam
-- [ ] Steam-интеграция (достижения, облачные сохранения)
-- [ ] Баланс, QA
-- [ ] Демо для Steam Next Fest
-- [ ] Трейлер, страница в Steam, маркетинг
-
----
-
-## 7. Инструменты для контента
-
-### Tiled Map Editor
-- Экспорт карт в JSON
-- Слои: background, collision, foreground, zones, entities
-- Custom Properties для зон: тип перехода, ambient звук, уровень люмбрита
-- Тайлсеты: один на зону Кальдерна (Край, Хребет, Кишки, Корень)
-
-### Aseprite (опционально)
-- Пиксель-арт спрайты и анимации
-- Экспорт в spritesheet JSON (совместим с PixiJS)
-
-### Звук
-- Ambient: нарезка, loop
-- Музыка: OGG для основного формата, MP3 как fallback
-- Web Audio API
-
----
-
-## 8. Деплой
-
-### Разработка
+### Development
 ```bash
-npm run dev          # Vite dev server с HMR
-npm run test         # Vitest — все тесты
-npm run test:watch   # Тесты в watch-режиме
-npm run lint         # ESLint + Prettier check
+npm run dev          # Vite dev server with HMR
+npm run test         # Vitest — all tests
+npm run test:watch   # Tests in watch mode
 ```
 
-### Продакшн
+### Production
 ```bash
 npm run build        # Vite production build
-npm run preview      # Локальный просмотр билда
+npm run preview      # Local build preview
 ```
 
 ### Steam (Tauri)
 ```bash
-npm run tauri build  # Нативный билд для Windows/Mac/Linux
+npm run tauri build  # Native build for Windows/Mac/Linux
 ```
 
-Размер билда: ~10-20MB (vs 150MB+ Electron). Включает нативный webview, не тащит Chromium.
-
-### Web-демо
-Vite build -> деплой на Netlify/Vercel/itch.io. Бесплатный хостинг, мгновенный доступ для игроков.
+Build size: ~10-20MB (vs 150MB+ Electron). Includes native webview, doesn't ship Chromium.

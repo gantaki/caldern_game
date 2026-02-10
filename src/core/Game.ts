@@ -24,9 +24,15 @@ import { InputManager } from './InputManager';
 import { Player } from '@/entities/Player';
 import { TileMap } from '@/world/TileMap';
 import { resolveBodyTilemap } from '@/physics/CollisionSystem';
-import { generateTestLevel, TEST_SPAWN } from '@/world/testLevel';
+import { generateTestLevel } from '@/world/testLevel';
 import { DebugPanel } from '@/utils/DebugPanel';
 import { AmbientMusic } from '@/audio/AmbientMusic';
+import { type InteractiveObject } from '@/entities/InteractiveObject';
+import { SteamElevator } from '@/entities/SteamElevator';
+import { Ladder } from '@/entities/Ladder';
+import { Rope } from '@/entities/Rope';
+import { NPC } from '@/entities/NPC';
+import { DialogueManager } from '@/dialogue/DialogueManager';
 
 export class Game {
   private app: Application;
@@ -35,9 +41,15 @@ export class Game {
   private player: Player;
   private tileMap: TileMap;
 
+  // World objects
+  private objects: InteractiveObject[] = [];
+  private npcs: NPC[] = [];
+  private dialogue: DialogueManager;
+
   // Render layers
   private worldContainer: Container;
   private tileGraphics: Graphics;
+  private objectGraphics: Graphics;
   private entityGraphics: Graphics;
   private lightingSprite: Sprite;
   private lightingTexture: RenderTexture;
@@ -56,29 +68,55 @@ export class Game {
     this.app = app;
     this.input = new InputManager();
     this.camera = new Camera();
+    this.dialogue = new DialogueManager();
 
     // Load test level
     const levelData = generateTestLevel();
-    this.tileMap = new TileMap(levelData);
+    this.tileMap = new TileMap(levelData.tilemap);
 
     // Create player
-    this.player = new Player(TEST_SPAWN.x, TEST_SPAWN.y);
+    this.player = new Player(levelData.spawn.x, levelData.spawn.y);
 
-    // Set camera bounds to map size
+    // Create interactive objects
+    for (const def of levelData.objects) {
+      switch (def.type) {
+        case 'elevator':
+          this.objects.push(
+            new SteamElevator(def.x, def.y, def.width ?? 24, def.height ?? 6, def.travelDistance ?? 80),
+          );
+          break;
+        case 'ladder':
+          this.objects.push(new Ladder(def.x, def.y, def.height ?? 64));
+          break;
+        case 'rope':
+          this.objects.push(new Rope(def.x, def.y, def.width ?? 80));
+          break;
+      }
+    }
+
+    // Create NPCs
+    for (const npcData of levelData.npcs) {
+      this.npcs.push(new NPC(npcData));
+    }
+
+    // Camera bounds
     this.camera.setBounds(0, 0, this.tileMap.pixelWidth, this.tileMap.pixelHeight);
     this.camera.snapTo({ x: this.player.body.centerX, y: this.player.body.centerY });
 
-    // Setup render layers
+    // Render layers
     this.worldContainer = new Container();
     this.app.stage.addChild(this.worldContainer);
 
     this.tileGraphics = new Graphics();
     this.worldContainer.addChild(this.tileGraphics);
 
+    this.objectGraphics = new Graphics();
+    this.worldContainer.addChild(this.objectGraphics);
+
     this.entityGraphics = new Graphics();
     this.worldContainer.addChild(this.entityGraphics);
 
-    // Lighting layer (drawn separately, blended on top)
+    // Lighting layer
     this.lightingGraphics = new Graphics();
     this.lightingTexture = RenderTexture.create({
       width: GAME_WIDTH,
@@ -88,11 +126,10 @@ export class Game {
     this.lightingSprite.blendMode = 'multiply';
     this.app.stage.addChild(this.lightingSprite);
 
-    // Debug panel & ambient music
+    // Debug & music
     this.debug = new DebugPanel();
     this.ambientMusic = new AmbientMusic();
 
-    // Start music on first user interaction (browser autoplay policy)
     const startMusic = (): void => {
       if (!this.musicStarted) {
         this.ambientMusic.start();
@@ -113,29 +150,31 @@ export class Game {
     let frameTime = now - this.lastTime;
     this.lastTime = now;
 
-    // Prevent spiral of death
     if (frameTime > MAX_FRAME_TIME) {
       frameTime = MAX_FRAME_TIME;
     }
 
     this.accumulator += frameTime;
 
-    // Fixed timestep physics
     while (this.accumulator >= FIXED_DT) {
       this.fixedUpdate(FIXED_DT);
       this.accumulator -= FIXED_DT;
     }
 
-    // Render with interpolation factor
     this.render();
-
-    // End of frame
     this.input.endFrame();
   }
 
   private fixedUpdate(dt: number): void {
+    // Dialogue blocks gameplay input
+    if (this.dialogue.isActive) {
+      if (this.input.isPressed('interact')) {
+        this.dialogue.dismiss();
+      }
+      return;
+    }
+
     if (this.debug.state.noGravity) {
-      // Free-fly mode: direct movement, no physics
       const axisX = this.input.getAxisX();
       const axisY = this.input.getAxisY();
       const flySpeed = PLAYER_SPEED * 2.5;
@@ -144,27 +183,95 @@ export class Game {
       this.player.body.x += axisX * flySpeed * dt;
       this.player.body.y += axisY * flySpeed * dt;
     } else {
-      // Normal: player input + physics
+      this.handleObjectInteractions();
+      this.handleNPCInteractions();
+
       this.player.update(this.input, dt);
-      resolveBodyTilemap(this.player.body, this.tileMap, dt);
+
+      if (this.player.state === 'normal') {
+        resolveBodyTilemap(this.player.body, this.tileMap, dt);
+      } else {
+        // On ladder/rope: apply velocity directly, no gravity
+        this.player.body.x += this.player.body.vx * dt;
+        this.player.body.y += this.player.body.vy * dt;
+      }
     }
 
-    // Camera follows player
+    for (const obj of this.objects) {
+      obj.update(dt);
+    }
+    for (const npc of this.npcs) {
+      npc.update(dt);
+    }
+
     this.camera.follow(
       { x: this.player.body.centerX, y: this.player.body.centerY },
-      dt
+      dt,
     );
+  }
+
+  private handleObjectInteractions(): void {
+    const body = this.player.body;
+
+    for (const obj of this.objects) {
+      if (obj.type === 'ladder' && obj.overlaps(body)) {
+        if (this.player.state === 'normal' && (this.input.isDown('up') || this.input.isDown('down'))) {
+          this.player.startClimbing();
+          this.player.body.x = obj.x + (obj.width - body.width) / 2;
+        }
+      }
+      if (obj.type === 'ladder' && this.player.state === 'climbing' && !obj.overlaps(body)) {
+        this.player.state = 'normal';
+      }
+
+      if (obj.type === 'rope' && obj.overlaps(body)) {
+        if (this.player.state === 'normal' && this.input.isDown('up')) {
+          this.player.startRope();
+          this.player.body.y = obj.y;
+        }
+      }
+
+      if (obj.type === 'elevator') {
+        const elevator = obj as SteamElevator;
+        if (obj.inRange(body) && this.input.isPressed('interact')) {
+          elevator.activate();
+        }
+        if (elevator.active) {
+          const onTop =
+            body.bottom >= obj.y - 2 &&
+            body.bottom <= obj.y + 4 &&
+            body.right > obj.x &&
+            body.left < obj.x + obj.width;
+          if (onTop) {
+            body.y = obj.y - body.height;
+            body.onGround = true;
+          }
+        }
+      }
+    }
+  }
+
+  private handleNPCInteractions(): void {
+    if (!this.input.isPressed('interact')) return;
+
+    for (const npc of this.npcs) {
+      if (npc.inRange(this.player.body)) {
+        const { name, text } = npc.interact();
+        this.dialogue.show(name, text);
+        return;
+      }
+    }
   }
 
   private render(): void {
     const camX = Math.round(this.camera.viewX);
     const camY = Math.round(this.camera.viewY);
 
-    // Offset world by camera
     this.worldContainer.x = -camX;
     this.worldContainer.y = -camY;
 
     this.renderTiles(camX, camY);
+    this.renderObjects();
     this.renderEntities();
     this.renderLighting(camX, camY);
   }
@@ -172,7 +279,6 @@ export class Game {
   private renderTiles(camX: number, camY: number): void {
     this.tileGraphics.clear();
 
-    // Only render visible tiles
     const startTx = Math.max(0, Math.floor(camX / TILE_SIZE));
     const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE));
     const startTy = Math.max(0, Math.floor(camY / TILE_SIZE));
@@ -185,10 +291,8 @@ export class Game {
         const py = ty * TILE_SIZE;
 
         if (this.tileMap.collision[idx]) {
-          // Solid tile - dark stone
           const lumbriteVal = this.tileMap.lumbrite[idx] ?? 0;
           if (lumbriteVal > 0) {
-            // Lumbrite-infused stone - bluish glow
             const t = lumbriteVal / 255;
             const r = Math.floor(0x1a + (0x44 - 0x1a) * t);
             const g = Math.floor(0x1a + (0x77 - 0x1a) * t);
@@ -196,32 +300,42 @@ export class Game {
             const color = (r << 16) | (g << 8) | b;
             this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(color);
           } else {
-            // Regular stone - varying dark grays
             const shade = 0x1a1a22 + ((tx * 7 + ty * 13) % 4) * 0x020203;
             this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(shade);
           }
         } else {
-          // Empty tile - dark background
           this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(COLOR_BG);
         }
       }
     }
   }
 
+  private renderObjects(): void {
+    this.objectGraphics.clear();
+    for (const obj of this.objects) {
+      obj.render(this.objectGraphics);
+    }
+  }
+
   private renderEntities(): void {
     this.entityGraphics.clear();
 
-    const p = this.player.body;
+    // NPCs
+    for (const npc of this.npcs) {
+      npc.render(this.entityGraphics);
+      if (npc.inRange(this.player.body) && !this.dialogue.isActive) {
+        npc.renderHint(this.entityGraphics);
+      }
+    }
 
-    // Player body
+    // Player
+    const p = this.player.body;
     this.entityGraphics.rect(p.x, p.y, p.width, p.height).fill(0xccccaa);
 
-    // Simple head
     const headX = p.x + p.width / 2;
     const headY = p.y + 2;
     this.entityGraphics.circle(headX, headY, 3).fill(0xddddbb);
 
-    // Lantern glow indicator (small dot)
     const lanternOffX = this.player.facingRight ? p.width + 1 : -3;
     this.entityGraphics
       .circle(p.x + lanternOffX, p.y + p.height * 0.4, 2)
@@ -231,7 +345,6 @@ export class Game {
   private renderLighting(camX: number, camY: number): void {
     this.lightingGraphics.clear();
 
-    // Full lighting debug mode — fill with white (multiply = no-op)
     if (this.debug.state.fullLighting) {
       this.lightingGraphics
         .rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
@@ -244,7 +357,6 @@ export class Game {
       return;
     }
 
-    // Fill with darkness
     const darkR = Math.floor(AMBIENT_DARKNESS * 20);
     const darkG = Math.floor(AMBIENT_DARKNESS * 18);
     const darkB = Math.floor(AMBIENT_DARKNESS * 25);
@@ -253,16 +365,23 @@ export class Game {
       .rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
       .fill(darkColor);
 
-    // Player lantern light
+    // Player lantern
     const plx = this.player.body.centerX - camX;
     const ply = this.player.body.centerY - camY;
     this.drawLight(plx, ply, PLAYER_LIGHT_RADIUS, 0xffeedd, PLAYER_LIGHT_INTENSITY);
 
-    // Lumbrite lights from visible tiles
-    const startTx = Math.max(0, Math.floor(camX / TILE_SIZE) - 2);
-    const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE) + 2);
-    const startTy = Math.max(0, Math.floor(camY / TILE_SIZE) - 2);
-    const endTy = Math.min(this.tileMap.height - 1, Math.ceil((camY + GAME_HEIGHT) / TILE_SIZE) + 2);
+    // NPC glow
+    for (const npc of this.npcs) {
+      const nx = npc.x + npc.width / 2 - camX;
+      const ny = npc.y + npc.height / 2 - camY;
+      this.drawLight(nx, ny, 30, 0xddaa77, 0.35);
+    }
+
+    // Lumbrite lights
+    const startTx = Math.max(0, Math.floor(camX / TILE_SIZE) - 4);
+    const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE) + 4);
+    const startTy = Math.max(0, Math.floor(camY / TILE_SIZE) - 4);
+    const endTy = Math.min(this.tileMap.height - 1, Math.ceil((camY + GAME_HEIGHT) / TILE_SIZE) + 4);
 
     for (let ty = startTy; ty <= endTy; ty++) {
       for (let tx = startTx; tx <= endTx; tx++) {
@@ -277,7 +396,6 @@ export class Game {
       }
     }
 
-    // Render lighting to texture
     this.app.renderer.render({
       container: this.lightingGraphics,
       target: this.lightingTexture,
@@ -285,15 +403,13 @@ export class Game {
     });
   }
 
-  /** Draw a radial light onto the lighting graphics (additive on dark background) */
   private drawLight(x: number, y: number, radius: number, color: number, intensity: number): void {
     const steps = 6;
     for (let i = steps; i >= 0; i--) {
       const t = i / steps;
       const r = radius * t;
-      const alpha = intensity * (1 - t * t); // Quadratic falloff
+      const alpha = intensity * (1 - t * t);
 
-      // Blend towards white (since we multiply)
       const cr = ((color >> 16) & 0xff) / 255;
       const cg = ((color >> 8) & 0xff) / 255;
       const cb = (color & 0xff) / 255;
