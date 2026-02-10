@@ -34,6 +34,10 @@ import { NPC } from '@/entities/NPC';
 import { DialogueManager } from '@/dialogue/DialogueManager';
 import { TileRenderer } from '@/rendering/TileRenderer';
 import { ParticleSystem } from '@/effects/ParticleSystem';
+import { BackgroundRenderer } from '@/rendering/BackgroundRenderer';
+import { type LightSource } from '@/rendering/LightSource';
+// Ensure portrait registry is loaded (side-effect import)
+import '@/dialogue/PortraitRenderer';
 
 export class Game {
   private app: Application;
@@ -58,8 +62,11 @@ export class Game {
 
   // Enhanced rendering
   private tileRenderer: TileRenderer;
+  private bgRenderer: BackgroundRenderer;
+  private bgGraphics: Graphics;
   private particles: ParticleSystem;
   private particleGraphics: Graphics;
+  private areaLights: LightSource[] = [];
 
   // Debug & audio
   private debug: DebugPanel;
@@ -109,6 +116,9 @@ export class Game {
       this.npcs.push(new NPC(npcData));
     }
 
+    // Area lights
+    this.areaLights = levelData.lights;
+
     // Camera bounds
     this.camera.setBounds(0, 0, this.tileMap.pixelWidth, this.tileMap.pixelHeight);
     this.camera.snapTo({ x: this.player.body.centerX, y: this.player.body.centerY });
@@ -116,6 +126,10 @@ export class Game {
     // Render layers
     this.worldContainer = new Container();
     this.app.stage.addChild(this.worldContainer);
+
+    // Background parallax (behind tiles)
+    this.bgGraphics = new Graphics();
+    this.worldContainer.addChild(this.bgGraphics);
 
     this.tileGraphics = new Graphics();
     this.worldContainer.addChild(this.tileGraphics);
@@ -131,6 +145,7 @@ export class Game {
 
     // Enhanced rendering
     this.tileRenderer = new TileRenderer(this.tileMap);
+    this.bgRenderer = new BackgroundRenderer(this.tileMap.pixelWidth, this.tileMap.pixelHeight);
     this.particles = new ParticleSystem();
 
     // Lighting layer
@@ -293,6 +308,7 @@ export class Game {
     this.worldContainer.x = -camX;
     this.worldContainer.y = -camY;
 
+    this.bgRenderer.render(this.bgGraphics, camX, camY);
     this.tileRenderer.render(this.tileGraphics, camX, camY);
     this.renderObjects();
     this.renderEntities();
@@ -446,6 +462,30 @@ export class Game {
       this.drawLight(nx, ny, 32, 0xddaa77, npcPulse);
     }
 
+    // Area lights (static level lights — torches, lamps, etc.)
+    for (const light of this.areaLights) {
+      const lx = light.x - camX;
+      const ly = light.y - camY;
+      // Cull lights outside viewport (with generous margin)
+      if (lx < -light.radius || lx > GAME_WIDTH + light.radius) continue;
+      if (ly < -light.radius || ly > GAME_HEIGHT + light.radius) continue;
+
+      let effectiveIntensity = light.intensity;
+      let effectiveRadius = light.radius;
+
+      if (light.pulse) {
+        const p = Math.sin(this.gameTime * light.pulse.speed) * light.pulse.amount;
+        effectiveIntensity *= (1 + p);
+        effectiveRadius *= (1 + p * 0.3);
+      }
+      if (light.flicker) {
+        const flick = 0.95 + Math.sin(this.gameTime * 11 + light.x * 0.1) * 0.03
+          + Math.sin(this.gameTime * 23 + light.y * 0.1) * 0.02;
+        effectiveIntensity *= flick;
+      }
+      this.drawLight(lx, ly, effectiveRadius, light.color, effectiveIntensity);
+    }
+
     // Lumbrite lights — with slow pulse
     const startTx = Math.max(0, Math.floor(camX / TILE_SIZE) - 4);
     const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE) + 4);
@@ -476,19 +516,25 @@ export class Game {
   }
 
   private drawLight(x: number, y: number, radius: number, color: number, intensity: number): void {
-    const steps = 6;
+    // Compute base from actual ambient to prevent halo mismatch
+    const baseR = Math.floor(AMBIENT_DARKNESS * 20) / 255;
+    const baseG = Math.floor(AMBIENT_DARKNESS * 18) / 255;
+    const baseB = Math.floor(AMBIENT_DARKNESS * 25) / 255;
+
+    const cr = ((color >> 16) & 0xff) / 255;
+    const cg = ((color >> 8) & 0xff) / 255;
+    const cb = (color & 0xff) / 255;
+
+    // More steps for smoother gradient, cubic falloff for softer edge
+    const steps = 10;
     for (let i = steps; i >= 0; i--) {
       const t = i / steps;
       const r = radius * t;
-      const alpha = intensity * (1 - t * t);
+      const alpha = intensity * (1 - t * t * t);
 
-      const cr = ((color >> 16) & 0xff) / 255;
-      const cg = ((color >> 8) & 0xff) / 255;
-      const cb = (color & 0xff) / 255;
-
-      const lr = Math.min(255, Math.floor((0.08 + cr * alpha) * 255));
-      const lg = Math.min(255, Math.floor((0.07 + cg * alpha) * 255));
-      const lb = Math.min(255, Math.floor((0.1 + cb * alpha) * 255));
+      const lr = Math.min(255, Math.floor((baseR + cr * alpha) * 255));
+      const lg = Math.min(255, Math.floor((baseG + cg * alpha) * 255));
+      const lb = Math.min(255, Math.floor((baseB + cb * alpha) * 255));
 
       const lightColor = (lr << 16) | (lg << 8) | lb;
       this.lightingGraphics.circle(x, y, Math.max(r, 1)).fill(lightColor);

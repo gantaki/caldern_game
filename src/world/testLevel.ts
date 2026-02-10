@@ -1,6 +1,7 @@
 import { type TileMapData } from '@/world/TileMap';
 import { TILE_SIZE } from '@/config/constants';
 import { type NPCData } from '@/entities/NPC';
+import { type LightSource } from '@/rendering/LightSource';
 
 export interface LevelObjectDef {
   type: 'elevator' | 'ladder' | 'rope';
@@ -15,6 +16,7 @@ export interface LevelData {
   tilemap: TileMapData;
   objects: LevelObjectDef[];
   npcs: NPCData[];
+  lights: LightSource[];
   spawn: { x: number; y: number };
 }
 
@@ -162,6 +164,28 @@ export function generateTestLevel(): LevelData {
     },
   ];
 
+  // --- Area lights — permanently lit zones ---
+  const lights: LightSource[] = [
+    // Warm torch near spawn area
+    { x: 12 * TILE_SIZE, y: 66 * TILE_SIZE, radius: 50, color: 0xffbb66, intensity: 0.55, flicker: true },
+    // Old gas lamp on first platform
+    { x: 26 * TILE_SIZE, y: 66 * TILE_SIZE, radius: 40, color: 0xeebb77, intensity: 0.45, flicker: true },
+    // Torch on the wide platform
+    { x: 62 * TILE_SIZE, y: 50 * TILE_SIZE, radius: 45, color: 0xffaa55, intensity: 0.5, flicker: true },
+    // Lit area near elevator — steam glow
+    { x: 36 * TILE_SIZE, y: 50 * TILE_SIZE, radius: 35, color: 0xccbbaa, intensity: 0.35,
+      pulse: { speed: 2.0, amount: 0.15 } },
+    // Large lit section in the middle
+    { x: 80 * TILE_SIZE, y: 62 * TILE_SIZE, radius: 65, color: 0xddcc99, intensity: 0.6, flicker: true },
+    // Reddish glow deep in the cave
+    { x: 120 * TILE_SIZE, y: 55 * TILE_SIZE, radius: 50, color: 0xdd8855, intensity: 0.4,
+      pulse: { speed: 0.8, amount: 0.2 } },
+    // Cold light near ladder
+    { x: 112 * TILE_SIZE, y: 38 * TILE_SIZE, radius: 35, color: 0x99aabb, intensity: 0.4 },
+    // Far-end warm torch
+    { x: 145 * TILE_SIZE, y: 62 * TILE_SIZE, radius: 42, color: 0xffbb66, intensity: 0.45, flicker: true },
+  ];
+
   const spawn = { x: 10 * TILE_SIZE, y: 68 * TILE_SIZE };
 
   return {
@@ -175,6 +199,7 @@ export function generateTestLevel(): LevelData {
     },
     objects,
     npcs,
+    lights,
     spawn,
   };
 }

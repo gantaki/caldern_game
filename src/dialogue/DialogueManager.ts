@@ -1,9 +1,12 @@
+import { renderPortrait } from './PortraitRenderer';
+
 /**
- * Simple dialogue overlay — shows NPC name + text at the bottom of the screen.
- * Advances or dismisses on interact key press.
+ * Dialogue overlay with optional portrait — Celeste-style.
+ * Shows portrait (left), NPC name + text, and hint at the bottom of the screen.
  */
 export class DialogueManager {
   private container: HTMLDivElement;
+  private portraitImg: HTMLImageElement;
   private nameEl: HTMLSpanElement;
   private textEl: HTMLDivElement;
   private active = false;
@@ -17,19 +20,58 @@ export class DialogueManager {
       bottom: '20px',
       left: '50%',
       transform: 'translateX(-50%)',
-      background: 'rgba(5, 5, 10, 0.92)',
+      background: 'rgba(5, 5, 10, 0.94)',
       color: '#ddd',
       fontFamily: 'monospace',
       fontSize: '14px',
-      padding: '12px 20px',
+      padding: '0',
       borderRadius: '4px',
       border: '1px solid #334',
       zIndex: '9000',
       display: 'none',
-      maxWidth: '600px',
-      minWidth: '300px',
+      maxWidth: '620px',
+      minWidth: '340px',
       textAlign: 'left',
       lineHeight: '1.4',
+      overflow: 'hidden',
+    });
+
+    // Inner layout: [portrait | text area]
+    const inner = document.createElement('div');
+    Object.assign(inner.style, {
+      display: 'flex',
+      alignItems: 'stretch',
+    });
+
+    // Portrait area
+    const portraitBox = document.createElement('div');
+    Object.assign(portraitBox.style, {
+      width: '68px',
+      minHeight: '68px',
+      background: 'rgba(10, 10, 18, 0.95)',
+      borderRight: '1px solid #2a2a36',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '10px',
+      flexShrink: '0',
+    });
+
+    this.portraitImg = document.createElement('img');
+    Object.assign(this.portraitImg.style, {
+      width: '48px',
+      height: '48px',
+      imageRendering: 'pixelated',
+      display: 'none',
+    });
+    portraitBox.appendChild(this.portraitImg);
+
+    // Text area
+    const textArea = document.createElement('div');
+    Object.assign(textArea.style, {
+      padding: '10px 16px',
+      flex: '1',
+      minWidth: '0',
     });
 
     this.nameEl = document.createElement('span');
@@ -39,22 +81,31 @@ export class DialogueManager {
       display: 'block',
       marginBottom: '4px',
       fontSize: '12px',
+      letterSpacing: '0.5px',
     });
 
     this.textEl = document.createElement('div');
+    Object.assign(this.textEl.style, {
+      fontSize: '13px',
+      lineHeight: '1.5',
+    });
 
     const hintEl = document.createElement('div');
     Object.assign(hintEl.style, {
-      color: '#666',
+      color: '#555',
       fontSize: '10px',
       marginTop: '6px',
       textAlign: 'right',
     });
     hintEl.textContent = '[E] continue';
 
-    this.container.appendChild(this.nameEl);
-    this.container.appendChild(this.textEl);
-    this.container.appendChild(hintEl);
+    textArea.appendChild(this.nameEl);
+    textArea.appendChild(this.textEl);
+    textArea.appendChild(hintEl);
+
+    inner.appendChild(portraitBox);
+    inner.appendChild(textArea);
+    this.container.appendChild(inner);
     document.body.appendChild(this.container);
   }
 
@@ -65,6 +116,16 @@ export class DialogueManager {
   show(name: string, text: string, onDismiss?: () => void): void {
     this.nameEl.textContent = name;
     this.textEl.textContent = text;
+
+    // Try to render portrait
+    const portraitUrl = renderPortrait(name);
+    if (portraitUrl) {
+      this.portraitImg.src = portraitUrl;
+      this.portraitImg.style.display = 'block';
+    } else {
+      this.portraitImg.style.display = 'none';
+    }
+
     this.container.style.display = 'block';
     this.active = true;
     this.onDismiss = onDismiss ?? null;
