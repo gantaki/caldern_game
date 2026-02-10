@@ -16,7 +16,6 @@ import {
   PLAYER_LIGHT_INTENSITY,
   LUMBRITE_LIGHT_RADIUS,
   LUMBRITE_LIGHT_COLOR,
-  COLOR_BG,
   PLAYER_SPEED,
 } from '@/config/constants';
 import { Camera } from './Camera';
@@ -33,6 +32,8 @@ import { Ladder } from '@/entities/Ladder';
 import { Rope } from '@/entities/Rope';
 import { NPC } from '@/entities/NPC';
 import { DialogueManager } from '@/dialogue/DialogueManager';
+import { TileRenderer } from '@/rendering/TileRenderer';
+import { ParticleSystem } from '@/effects/ParticleSystem';
 
 export class Game {
   private app: Application;
@@ -55,14 +56,23 @@ export class Game {
   private lightingTexture: RenderTexture;
   private lightingGraphics: Graphics;
 
+  // Enhanced rendering
+  private tileRenderer: TileRenderer;
+  private particles: ParticleSystem;
+  private particleGraphics: Graphics;
+
   // Debug & audio
   private debug: DebugPanel;
   private ambientMusic: AmbientMusic;
   private musicStarted = false;
 
-  // Timing
+  // Timing & effects
   private accumulator = 0;
   private lastTime = 0;
+  private gameTime = 0;
+  private lanternFlicker = 0;
+  private dustTimer = 0;
+  private dripTimer = 0;
 
   constructor(app: Application) {
     this.app = app;
@@ -115,6 +125,13 @@ export class Game {
 
     this.entityGraphics = new Graphics();
     this.worldContainer.addChild(this.entityGraphics);
+
+    this.particleGraphics = new Graphics();
+    this.worldContainer.addChild(this.particleGraphics);
+
+    // Enhanced rendering
+    this.tileRenderer = new TileRenderer(this.tileMap);
+    this.particles = new ParticleSystem();
 
     // Lighting layer
     this.lightingGraphics = new Graphics();
@@ -208,6 +225,12 @@ export class Game {
       { x: this.player.body.centerX, y: this.player.body.centerY },
       dt,
     );
+
+    // Update effects
+    this.gameTime += dt;
+    this.particles.update(dt);
+    this.updateLanternFlicker(dt);
+    this.spawnEnvironmentalParticles(dt);
   }
 
   private handleObjectInteractions(): void {
@@ -270,44 +293,11 @@ export class Game {
     this.worldContainer.x = -camX;
     this.worldContainer.y = -camY;
 
-    this.renderTiles(camX, camY);
+    this.tileRenderer.render(this.tileGraphics, camX, camY);
     this.renderObjects();
     this.renderEntities();
+    this.renderParticles();
     this.renderLighting(camX, camY);
-  }
-
-  private renderTiles(camX: number, camY: number): void {
-    this.tileGraphics.clear();
-
-    const startTx = Math.max(0, Math.floor(camX / TILE_SIZE));
-    const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE));
-    const startTy = Math.max(0, Math.floor(camY / TILE_SIZE));
-    const endTy = Math.min(this.tileMap.height - 1, Math.ceil((camY + GAME_HEIGHT) / TILE_SIZE));
-
-    for (let ty = startTy; ty <= endTy; ty++) {
-      for (let tx = startTx; tx <= endTx; tx++) {
-        const idx = ty * this.tileMap.width + tx;
-        const px = tx * TILE_SIZE;
-        const py = ty * TILE_SIZE;
-
-        if (this.tileMap.collision[idx]) {
-          const lumbriteVal = this.tileMap.lumbrite[idx] ?? 0;
-          if (lumbriteVal > 0) {
-            const t = lumbriteVal / 255;
-            const r = Math.floor(0x1a + (0x44 - 0x1a) * t);
-            const g = Math.floor(0x1a + (0x77 - 0x1a) * t);
-            const b = Math.floor(0x22 + (0xaa - 0x22) * t);
-            const color = (r << 16) | (g << 8) | b;
-            this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(color);
-          } else {
-            const shade = 0x1a1a22 + ((tx * 7 + ty * 13) % 4) * 0x020203;
-            this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(shade);
-          }
-        } else {
-          this.tileGraphics.rect(px, py, TILE_SIZE, TILE_SIZE).fill(COLOR_BG);
-        }
-      }
-    }
   }
 
   private renderObjects(): void {
@@ -319,27 +309,95 @@ export class Game {
 
   private renderEntities(): void {
     this.entityGraphics.clear();
+    const gfx = this.entityGraphics;
 
     // NPCs
     for (const npc of this.npcs) {
-      npc.render(this.entityGraphics);
+      npc.render(gfx);
       if (npc.inRange(this.player.body) && !this.dialogue.isActive) {
-        npc.renderHint(this.entityGraphics);
+        npc.renderHint(gfx);
       }
     }
 
-    // Player
+    // Player — detailed pixel sprite
     const p = this.player.body;
-    this.entityGraphics.rect(p.x, p.y, p.width, p.height).fill(0xccccaa);
+    const px = Math.floor(p.x);
+    const py = Math.floor(p.y);
+    const cx = px + Math.floor(p.width / 2);
+    const facingR = this.player.facingRight;
 
-    const headX = p.x + p.width / 2;
-    const headY = p.y + 2;
-    this.entityGraphics.circle(headX, headY, 3).fill(0xddddbb);
+    // Shadow beneath player
+    gfx.rect(px + 1, py + p.height, p.width - 2, 1).fill(0x080810);
 
-    const lanternOffX = this.player.facingRight ? p.width + 1 : -3;
-    this.entityGraphics
-      .circle(p.x + lanternOffX, p.y + p.height * 0.4, 2)
-      .fill(0xffcc66);
+    // Boots
+    gfx.rect(px + 1, py + 11, 3, 3).fill(0x443322);    // left boot
+    gfx.rect(px + 6, py + 11, 3, 3).fill(0x443322);    // right boot
+    gfx.rect(px + 1, py + 13, 4, 1).fill(0x332211);    // left sole
+    gfx.rect(px + 6, py + 13, 4, 1).fill(0x332211);    // right sole
+
+    // Legs (trousers)
+    gfx.rect(px + 2, py + 8, 3, 3).fill(0x554433);     // left leg
+    gfx.rect(px + 5, py + 8, 3, 3).fill(0x554433);     // right leg
+
+    // Body — layered tunic + vest
+    gfx.rect(px + 1, py + 3, p.width - 2, 6).fill(0xbbaa88);  // tunic
+    gfx.rect(px + 2, py + 3, 2, 5).fill(0x998866);     // vest left
+    gfx.rect(px + p.width - 4, py + 3, 2, 5).fill(0x998866);  // vest right
+    // Belt
+    gfx.rect(px + 1, py + 7, p.width - 2, 1).fill(0x554433);
+    gfx.rect(px + 4, py + 7, 2, 1).fill(0x887744);     // buckle
+
+    // Collar detail
+    gfx.rect(px + 3, py + 3, 4, 1).fill(0xccbb99);
+
+    // Arm holding lantern
+    const armX = facingR ? px + p.width - 1 : px - 1;
+    gfx.rect(armX, py + 4, 2, 4).fill(0xbbaa88);
+
+    // Other arm
+    const arm2X = facingR ? px - 1 : px + p.width - 1;
+    gfx.rect(arm2X, py + 4, 2, 4).fill(0xbbaa88);
+
+    // Head
+    const headY = py + 1;
+    gfx.circle(cx, headY + 1, 3).fill(0xddccaa);
+
+    // Eyes
+    const eyeOff = facingR ? 1 : -1;
+    gfx.rect(cx + eyeOff - 1, headY, 1, 1).fill(0x222222);
+    gfx.rect(cx + eyeOff + 1, headY, 1, 1).fill(0x222222);
+
+    // Mining helmet
+    gfx.rect(cx - 4, py - 2, 8, 2).fill(0x887744);     // brim
+    gfx.rect(cx - 3, py - 4, 6, 3).fill(0x998855);     // dome
+    // Headlamp
+    gfx.rect(cx - 1, py - 3, 2, 2).fill(0xffdd88);
+    // Helmet highlight
+    gfx.rect(cx - 2, py - 4, 4, 1).fill(0xaa9966);
+
+    // Lantern — swinging slightly
+    const lanternSwing = Math.sin(this.gameTime * 3) * 0.5;
+    const lanternX = facingR ? px + p.width + 1 : px - 4;
+    const lanternY = Math.floor(py + 5 + lanternSwing);
+
+    // Lantern body (cage)
+    gfx.rect(lanternX, lanternY, 3, 4).fill(0x665533);
+    // Lantern handle
+    gfx.rect(lanternX, lanternY - 1, 3, 1).fill(0x777766);
+    // Lantern flame — flickers
+    const flameIntensity = 0.7 + this.lanternFlicker * 0.3;
+    const flameR = Math.floor(0xff * flameIntensity);
+    const flameG = Math.floor(0xcc * flameIntensity);
+    const flameB = Math.floor(0x44 * flameIntensity);
+    const flameColor = (flameR << 16) | (flameG << 8) | flameB;
+    gfx.rect(lanternX + 1, lanternY + 1, 1, 2).fill(flameColor);
+    // Lantern glow (small bright dot)
+    gfx.rect(lanternX + 1, lanternY + 1, 1, 1).fill(0xffeeaa);
+  }
+
+  private renderParticles(): void {
+    this.particleGraphics.clear();
+    this.particles.render(this.particleGraphics);
   }
 
   private renderLighting(camX: number, camY: number): void {
@@ -365,19 +423,30 @@ export class Game {
       .rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
       .fill(darkColor);
 
-    // Player lantern
+    // Player lantern — with flicker
     const plx = this.player.body.centerX - camX;
     const ply = this.player.body.centerY - camY;
-    this.drawLight(plx, ply, PLAYER_LIGHT_RADIUS, 0xffeedd, PLAYER_LIGHT_INTENSITY);
+    const flickerRadius = PLAYER_LIGHT_RADIUS * (0.95 + this.lanternFlicker * 0.05);
+    const flickerIntensity = PLAYER_LIGHT_INTENSITY * (0.85 + this.lanternFlicker * 0.15);
+    // Warm lantern color shifts slightly with flicker
+    const warmShift = Math.floor(this.lanternFlicker * 15);
+    const lanternColor = (0xff << 16) | ((0xee - warmShift) << 8) | (0xdd - warmShift * 2);
+    this.drawLight(plx, ply, flickerRadius, lanternColor, flickerIntensity);
 
-    // NPC glow
+    // Secondary smaller warm glow around lantern position
+    const facingR = this.player.facingRight;
+    const lanternOffX = facingR ? 6 : -6;
+    this.drawLight(plx + lanternOffX, ply - 2, flickerRadius * 0.4, 0xffcc88, flickerIntensity * 0.5);
+
+    // NPC glow — warmer, with subtle pulse
     for (const npc of this.npcs) {
       const nx = npc.x + npc.width / 2 - camX;
       const ny = npc.y + npc.height / 2 - camY;
-      this.drawLight(nx, ny, 30, 0xddaa77, 0.35);
+      const npcPulse = 0.3 + Math.sin(this.gameTime * 1.5) * 0.05;
+      this.drawLight(nx, ny, 32, 0xddaa77, npcPulse);
     }
 
-    // Lumbrite lights
+    // Lumbrite lights — with slow pulse
     const startTx = Math.max(0, Math.floor(camX / TILE_SIZE) - 4);
     const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE) + 4);
     const startTy = Math.max(0, Math.floor(camY / TILE_SIZE) - 4);
@@ -389,8 +458,11 @@ export class Game {
         if (lumVal > 30) {
           const lx = tx * TILE_SIZE + TILE_SIZE / 2 - camX;
           const ly = ty * TILE_SIZE + TILE_SIZE / 2 - camY;
-          const radius = LUMBRITE_LIGHT_RADIUS * (lumVal / 255);
-          const intensity = 0.4 * (lumVal / 255);
+          // Each lumbrite tile pulses at a slightly different phase
+          const phase = (tx * 17 + ty * 31) * 0.1;
+          const pulse = 0.85 + Math.sin(this.gameTime * 0.8 + phase) * 0.15;
+          const radius = LUMBRITE_LIGHT_RADIUS * (lumVal / 255) * pulse;
+          const intensity = 0.4 * (lumVal / 255) * pulse;
           this.drawLight(lx, ly, radius, LUMBRITE_LIGHT_COLOR, intensity);
         }
       }
@@ -420,6 +492,127 @@ export class Game {
 
       const lightColor = (lr << 16) | (lg << 8) | lb;
       this.lightingGraphics.circle(x, y, Math.max(r, 1)).fill(lightColor);
+    }
+  }
+
+  /** Update lantern flicker — randomized warmth oscillation */
+  private updateLanternFlicker(_dt: number): void {
+    // Combine two sine waves for organic flicker
+    const fast = Math.sin(this.gameTime * 12.7);
+    const slow = Math.sin(this.gameTime * 3.1);
+    const noise = Math.sin(this.gameTime * 47.3) * 0.15; // high-freq jitter
+    this.lanternFlicker = 0.5 + (fast * 0.3 + slow * 0.2 + noise);
+    this.lanternFlicker = Math.max(0, Math.min(1, this.lanternFlicker));
+  }
+
+  /** Spawn floating dust motes, lumbrite sparkles, and water drips */
+  private spawnEnvironmentalParticles(dt: number): void {
+    const camX = this.camera.viewX;
+    const camY = this.camera.viewY;
+
+    // Cap particles
+    if (this.particles.count > 200) return;
+
+    // Dust motes — slow floating particles in air
+    this.dustTimer += dt;
+    if (this.dustTimer > 0.15) {
+      this.dustTimer = 0;
+      const dx = camX + Math.random() * GAME_WIDTH;
+      const dy = camY + Math.random() * GAME_HEIGHT;
+      // Only spawn in air (not inside solid tiles)
+      const ttx = Math.floor(dx / TILE_SIZE);
+      const tty = Math.floor(dy / TILE_SIZE);
+      if (!this.tileMap.isSolid(ttx, tty)) {
+        this.particles.emit({
+          x: dx,
+          y: dy,
+          vx: (Math.random() - 0.5) * 3,
+          vy: -2 - Math.random() * 4,
+          life: 3 + Math.random() * 4,
+          size: Math.random() < 0.5 ? 0.5 : 1,
+          color: 0x555566,
+          alpha: 0.3 + Math.random() * 0.2,
+          fadeOut: true,
+        });
+      }
+    }
+
+    // Lumbrite sparkles — bright flashes near lumbrite tiles
+    const startTx = Math.max(0, Math.floor(camX / TILE_SIZE));
+    const endTx = Math.min(this.tileMap.width - 1, Math.ceil((camX + GAME_WIDTH) / TILE_SIZE));
+    const startTy = Math.max(0, Math.floor(camY / TILE_SIZE));
+    const endTy = Math.min(this.tileMap.height - 1, Math.ceil((camY + GAME_HEIGHT) / TILE_SIZE));
+
+    for (let ty = startTy; ty <= endTy; ty++) {
+      for (let tx = startTx; tx <= endTx; tx++) {
+        const lumVal = this.tileMap.getLumbrite(tx, ty);
+        if (lumVal > 50 && Math.random() < 0.002 * (lumVal / 255)) {
+          // Check for adjacent air tile to spawn sparkle
+          if (!this.tileMap.isSolid(tx, ty - 1) || !this.tileMap.isSolid(tx - 1, ty) ||
+              !this.tileMap.isSolid(tx + 1, ty) || !this.tileMap.isSolid(tx, ty + 1)) {
+            const spx = tx * TILE_SIZE + Math.random() * TILE_SIZE;
+            const spy = ty * TILE_SIZE + Math.random() * TILE_SIZE;
+            this.particles.emit({
+              x: spx,
+              y: spy,
+              vx: (Math.random() - 0.5) * 6,
+              vy: -8 - Math.random() * 10,
+              life: 0.5 + Math.random() * 1,
+              size: 1,
+              color: 0x88bbee,
+              alpha: 0.7 + Math.random() * 0.3,
+              fadeOut: true,
+              shrink: true,
+            });
+          }
+        }
+      }
+    }
+
+    // Water drips — occasional drops from ceiling
+    this.dripTimer += dt;
+    if (this.dripTimer > 0.5) {
+      this.dripTimer = 0;
+      if (Math.random() < 0.3) {
+        // Pick a random x within view
+        const dripTx = startTx + Math.floor(Math.random() * (endTx - startTx));
+        // Find ceiling — first solid-to-air transition from top
+        for (let scanTy = startTy; scanTy < endTy; scanTy++) {
+          if (this.tileMap.isSolid(dripTx, scanTy) && !this.tileMap.isSolid(dripTx, scanTy + 1)) {
+            this.particles.emit({
+              x: dripTx * TILE_SIZE + TILE_SIZE / 2,
+              y: (scanTy + 1) * TILE_SIZE,
+              vx: 0,
+              vy: 2,
+              life: 2 + Math.random() * 2,
+              size: 0.5,
+              color: 0x5566aa,
+              alpha: 0.5,
+              gravity: 60,
+              fadeOut: true,
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    // Player footstep dust when running on ground
+    if (this.player.body.onGround && Math.abs(this.player.body.vx) > 30) {
+      if (Math.random() < 0.3) {
+        this.particles.emit({
+          x: this.player.body.x + this.player.body.width / 2,
+          y: this.player.body.y + this.player.body.height,
+          vx: -this.player.body.vx * 0.1 + (Math.random() - 0.5) * 5,
+          vy: -5 - Math.random() * 5,
+          life: 0.3 + Math.random() * 0.4,
+          size: 1,
+          color: 0x444433,
+          alpha: 0.4,
+          fadeOut: true,
+          shrink: true,
+        });
+      }
     }
   }
 }

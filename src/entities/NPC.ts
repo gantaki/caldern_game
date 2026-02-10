@@ -51,24 +51,60 @@ export class NPC {
 
   render(gfx: Graphics): void {
     const drawY = this.y + this.bobOffset;
+    const cx = this.x + this.width / 2;
 
-    // Body (worn clothes color)
-    gfx.rect(this.x, drawY, this.width, this.height).fill(0x887766);
+    // Shadow beneath
+    gfx.rect(this.x + 1, this.y + this.height, this.width - 2, 1).fill(0x080810);
+
+    // Legs / boots
+    gfx.rect(this.x + 1, drawY + 10, 3, 4).fill(0x443322);   // left boot
+    gfx.rect(this.x + 6, drawY + 10, 3, 4).fill(0x443322);   // right boot
+    gfx.rect(this.x + 1, drawY + 13, 4, 1).fill(0x332211);   // left sole
+    gfx.rect(this.x + 6, drawY + 13, 4, 1).fill(0x332211);   // right sole
+
+    // Body — tattered vest over shirt
+    gfx.rect(this.x + 1, drawY + 4, this.width - 2, 7).fill(0x665544);  // shirt
+    gfx.rect(this.x + 2, drawY + 4, 2, 6).fill(0x554433);  // vest left
+    gfx.rect(this.x + this.width - 4, drawY + 4, 2, 6).fill(0x554433);  // vest right
+    // Belt
+    gfx.rect(this.x + 1, drawY + 9, this.width - 2, 1).fill(0x443322);
+    gfx.rect(this.x + 4, drawY + 9, 2, 1).fill(0x887744);  // belt buckle
+
+    // Arms
+    gfx.rect(this.x - 1, drawY + 5, 2, 5).fill(0x665544);  // left arm
+    gfx.rect(this.x + this.width - 1, drawY + 5, 2, 5).fill(0x665544);  // right arm
 
     // Head
-    const headX = this.x + this.width / 2;
     const headY = drawY + 2;
-    gfx.circle(headX, headY, 3).fill(0x998877);
+    gfx.circle(cx, headY, 3).fill(0x998877);
+
+    // Mining hat
+    gfx.rect(cx - 4, drawY - 2, 8, 2).fill(0x665533);  // hat brim
+    gfx.rect(cx - 3, drawY - 4, 6, 3).fill(0x776644);   // hat crown
 
     // Eyes
-    gfx.circle(headX - 1, headY, 0.5).fill(0x222222);
-    gfx.circle(headX + 1, headY, 0.5).fill(0x222222);
+    gfx.rect(Math.floor(cx - 2), headY - 1, 1, 1).fill(0x222222);
+    gfx.rect(Math.floor(cx + 1), headY - 1, 1, 1).fill(0x222222);
+
+    // Beard / stubble (for "old miner" vibe)
+    gfx.rect(Math.floor(cx - 2), headY + 2, 4, 1).fill(0x777766);
   }
 
   renderHint(gfx: Graphics): void {
     const hintX = this.x + this.width / 2;
-    const hintY = this.y - 8;
-    gfx.rect(hintX - 3, hintY - 1, 6, 5).fill(0x000000);
-    gfx.rect(hintX - 2, hintY, 4, 3).fill(0xffcc44);
+    const hintY = this.y - 10;
+
+    // Speech bubble background
+    gfx.rect(hintX - 5, hintY - 1, 10, 7).fill(0x111118);
+    gfx.rect(hintX - 4, hintY - 2, 8, 9).fill(0x111118);
+    // Bubble tail
+    gfx.rect(hintX - 1, hintY + 7, 2, 2).fill(0x111118);
+
+    // "E" letter in bubble
+    gfx.rect(hintX - 2, hintY, 4, 1).fill(0xffcc44);
+    gfx.rect(hintX - 2, hintY + 1, 1, 1).fill(0xffcc44);
+    gfx.rect(hintX - 2, hintY + 2, 3, 1).fill(0xffcc44);
+    gfx.rect(hintX - 2, hintY + 3, 1, 1).fill(0xffcc44);
+    gfx.rect(hintX - 2, hintY + 4, 4, 1).fill(0xffcc44);
   }
 }
