@@ -17,6 +17,7 @@ import {
   LUMBRITE_LIGHT_RADIUS,
   LUMBRITE_LIGHT_COLOR,
   COLOR_BG,
+  PLAYER_SPEED,
 } from '@/config/constants';
 import { Camera } from './Camera';
 import { InputManager } from './InputManager';
@@ -24,6 +25,8 @@ import { Player } from '@/entities/Player';
 import { TileMap } from '@/world/TileMap';
 import { resolveBodyTilemap } from '@/physics/CollisionSystem';
 import { generateTestLevel, TEST_SPAWN } from '@/world/testLevel';
+import { DebugPanel } from '@/utils/DebugPanel';
+import { AmbientMusic } from '@/audio/AmbientMusic';
 
 export class Game {
   private app: Application;
@@ -39,6 +42,11 @@ export class Game {
   private lightingSprite: Sprite;
   private lightingTexture: RenderTexture;
   private lightingGraphics: Graphics;
+
+  // Debug & audio
+  private debug: DebugPanel;
+  private ambientMusic: AmbientMusic;
+  private musicStarted = false;
 
   // Timing
   private accumulator = 0;
@@ -79,6 +87,20 @@ export class Game {
     this.lightingSprite = new Sprite(this.lightingTexture);
     this.lightingSprite.blendMode = 'multiply';
     this.app.stage.addChild(this.lightingSprite);
+
+    // Debug panel & ambient music
+    this.debug = new DebugPanel();
+    this.ambientMusic = new AmbientMusic();
+
+    // Start music on first user interaction (browser autoplay policy)
+    const startMusic = (): void => {
+      if (!this.musicStarted) {
+        this.ambientMusic.start();
+        this.musicStarted = true;
+      }
+    };
+    window.addEventListener('keydown', startMusic, { once: true });
+    window.addEventListener('click', startMusic, { once: true });
   }
 
   start(): void {
@@ -112,9 +134,20 @@ export class Game {
   }
 
   private fixedUpdate(dt: number): void {
-    // Player input + physics
-    this.player.update(this.input, dt);
-    resolveBodyTilemap(this.player.body, this.tileMap, dt);
+    if (this.debug.state.noGravity) {
+      // Free-fly mode: direct movement, no physics
+      const axisX = this.input.getAxisX();
+      const axisY = this.input.getAxisY();
+      const flySpeed = PLAYER_SPEED * 2.5;
+      this.player.body.vx = 0;
+      this.player.body.vy = 0;
+      this.player.body.x += axisX * flySpeed * dt;
+      this.player.body.y += axisY * flySpeed * dt;
+    } else {
+      // Normal: player input + physics
+      this.player.update(this.input, dt);
+      resolveBodyTilemap(this.player.body, this.tileMap, dt);
+    }
 
     // Camera follows player
     this.camera.follow(
@@ -197,6 +230,19 @@ export class Game {
 
   private renderLighting(camX: number, camY: number): void {
     this.lightingGraphics.clear();
+
+    // Full lighting debug mode — fill with white (multiply = no-op)
+    if (this.debug.state.fullLighting) {
+      this.lightingGraphics
+        .rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+        .fill(0xffffff);
+      this.app.renderer.render({
+        container: this.lightingGraphics,
+        target: this.lightingTexture,
+        clear: true,
+      });
+      return;
+    }
 
     // Fill with darkness
     const darkR = Math.floor(AMBIENT_DARKNESS * 20);
