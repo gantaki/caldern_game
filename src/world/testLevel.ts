@@ -21,8 +21,13 @@ export interface LevelData {
 }
 
 /**
- * Generate a test level with 8px tiles (160x100 grid = 1280x800 pixels).
- * Includes interactive objects and an NPC.
+ * Generate a multi-tier mine level (160×100 tiles = 1280×800px).
+ *
+ * Layout (3 tiers + secret area):
+ *   Ground   y≈76  — main walkable floor, spawn, NPC
+ *   Tier 2   y=58  — mid-level platforms connected by ladders/elevator/ropes
+ *   Tier 3   y=38  — upper platforms connected by ladders/ropes
+ *   Secret   y=20  — reachable by grapple from tier 3
  */
 export function generateTestLevel(): LevelData {
   const width = 160;
@@ -44,88 +49,108 @@ export function generateTestLevel(): LevelData {
     }
   };
 
-  // Fill borders
-  for (let x = 0; x < width; x++) {
-    for (let t = 0; t < 2; t++) {
-      set(x, t, 1);
-      set(x, height - 1 - t, 1);
+  /** Fill a rectangle of solid tiles */
+  const fillRect = (x: number, y: number, w: number, h: number) => {
+    for (let dy = 0; dy < h; dy++) {
+      for (let dx = 0; dx < w; dx++) {
+        set(x + dx, y + dy, 1);
+      }
     }
-  }
+  };
+
+  // ══════════════════════════════════════════
+  // BORDERS (2 tiles thick)
+  // ══════════════════════════════════════════
+  fillRect(0, 0, width, 2);
+  fillRect(0, height - 2, width, 2);
   for (let y = 0; y < height; y++) {
-    for (let t = 0; t < 2; t++) {
-      set(t, y, 1);
-      set(width - 1 - t, y, 1);
-    }
+    set(0, y, 1); set(1, y, 1);
+    set(width - 1, y, 1); set(width - 2, y, 1);
   }
 
-  // Ground layer — irregular floor (doubled from 16px version)
+  // ══════════════════════════════════════════
+  // CEILING (irregular, y ≈ 4–8)
+  // ══════════════════════════════════════════
   for (let x = 0; x < width; x++) {
-    const groundY = 76 + Math.floor(Math.sin(x * 0.15) * 4);
-    for (let y = groundY; y < height; y++) {
-      set(x, y, 1);
-    }
+    const ceilY = 5 + Math.floor(Math.sin(x * 0.08) * 2 + Math.sin(x * 0.22) * 1);
+    for (let y = 0; y <= ceilY; y++) set(x, y, 1);
   }
 
-  // Ceiling
+  // ══════════════════════════════════════════
+  // GROUND FLOOR (irregular, y ≈ 74–78)
+  // ══════════════════════════════════════════
   for (let x = 0; x < width; x++) {
-    const ceilY = 4 + Math.floor(Math.sin(x * 0.1 + 1) * 3);
-    for (let y = 0; y <= ceilY; y++) {
-      set(x, y, 1);
-    }
+    const groundY = 76 + Math.floor(Math.sin(x * 0.1) * 2);
+    for (let y = groundY; y < height; y++) set(x, y, 1);
   }
 
-  // Platforms (all coordinates doubled from 16px grid)
-  const platforms = [
-    { x: 20, y: 68, w: 12 },
-    { x: 40, y: 60, w: 10 },
-    { x: 56, y: 52, w: 14 },
-    { x: 36, y: 44, w: 8 },
-    { x: 76, y: 64, w: 16 },
-    { x: 100, y: 56, w: 12 },
-    { x: 84, y: 48, w: 10 },
-    { x: 116, y: 68, w: 14 },
-    { x: 130, y: 60, w: 10 },
-    { x: 110, y: 40, w: 8 },
-  ];
+  // ══════════════════════════════════════════
+  // TIER 2 PLATFORMS (y = 58–59, 2 tiles thick)
+  // ══════════════════════════════════════════
+  // A — left (spawn side, near first ladder)
+  fillRect(10, 58, 22, 2);     // x:10–31
+  // B — center-left
+  fillRect(40, 58, 22, 2);     // x:40–61
+  // C — center-right
+  fillRect(70, 58, 28, 2);     // x:70–97
+  // D — right
+  fillRect(116, 58, 34, 2);    // x:116–149
 
-  for (const p of platforms) {
-    for (let x = p.x; x < p.x + p.w; x++) {
-      set(x, p.y, 1);
-      set(x, p.y + 1, 1); // 2-tile thick platforms
-    }
-  }
+  // ══════════════════════════════════════════
+  // TIER 3 PLATFORMS (y = 38–39, 2 tiles thick)
+  // ══════════════════════════════════════════
+  // E — left
+  fillRect(22, 38, 24, 2);     // x:22–45
+  // F — center
+  fillRect(54, 38, 28, 2);     // x:54–81
+  // G — right
+  fillRect(90, 38, 30, 2);     // x:90–119
 
-  // Walls / pillars (doubled)
-  const pillars = [
-    { x: 30, y: 60, h: 16 },
-    { x: 70, y: 56, h: 20 },
-    { x: 110, y: 52, h: 24 },
-    { x: 140, y: 64, h: 12 },
-  ];
+  // ══════════════════════════════════════════
+  // SECRET AREA (y = 20–21, grapple target)
+  // ══════════════════════════════════════════
+  fillRect(44, 20, 30, 2);     // x:44–73
 
-  for (const p of pillars) {
-    for (let y = p.y; y < p.y + p.h; y++) {
-      set(p.x, y, 1);
-      set(p.x + 1, y, 1);
-      set(p.x + 2, y, 1);
-      set(p.x + 3, y, 1);
-    }
-  }
+  // ══════════════════════════════════════════
+  // WALLS, PILLARS & OVERHANGS
+  // ══════════════════════════════════════════
+  // Left wall extension (thick nook)
+  fillRect(2, 44, 4, 32);      // x:2–5, y:44–75
 
-  // Lumbrite veins (doubled positions)
+  // Pillar between tier 2 B and C (visual + grapple overhang)
+  fillRect(64, 46, 4, 12);     // shaft x:64–67, y:46–57
+  fillRect(62, 46, 8, 2);      // cap   x:62–69, y:46–47
+
+  // Pillar between tier 2 C and D
+  fillRect(106, 50, 4, 8);     // shaft x:106–109, y:50–57
+  fillRect(104, 50, 8, 2);     // cap   x:104–111, y:50–51
+
+  // Overhangs for grapple between tier 3 and secret area
+  fillRect(48, 26, 3, 6);      // left pillar to secret
+  fillRect(70, 26, 3, 6);      // right pillar to secret
+
+  // Right-side stepping stones (ground → tier 2 alternative path)
+  fillRect(128, 70, 6, 2);     // x:128–133, y:70–71
+  fillRect(138, 66, 6, 2);     // x:138–143, y:66–67
+  fillRect(146, 62, 6, 2);     // x:146–151, y:62–63
+
+  // ══════════════════════════════════════════
+  // LUMBRITE VEINS
+  // ══════════════════════════════════════════
   const lumbriteSpots = [
-    { x: 30, y: 62, intensity: 180 },
-    { x: 32, y: 64, intensity: 120 },
-    { x: 70, y: 58, intensity: 200 },
-    { x: 72, y: 60, intensity: 150 },
-    { x: 110, y: 54, intensity: 220 },
-    { x: 112, y: 56, intensity: 160 },
-    { x: 2, y: 40, intensity: 100 },
-    { x: 3, y: 42, intensity: 80 },
-    { x: 158, y: 50, intensity: 140 },
-    { x: 56, y: 78, intensity: 100 },
-    { x: 100, y: 76, intensity: 130 },
-    { x: 130, y: 74, intensity: 110 },
+    { x: 4, y: 52, intensity: 160 },
+    { x: 4, y: 54, intensity: 120 },
+    { x: 18, y: 59, intensity: 180 },
+    { x: 65, y: 50, intensity: 200 },
+    { x: 66, y: 52, intensity: 150 },
+    { x: 82, y: 59, intensity: 170 },
+    { x: 107, y: 52, intensity: 190 },
+    { x: 108, y: 54, intensity: 140 },
+    { x: 135, y: 76, intensity: 120 },
+    { x: 58, y: 20, intensity: 220 },
+    { x: 62, y: 21, intensity: 180 },
+    { x: 38, y: 5, intensity: 100 },
+    { x: 110, y: 5, intensity: 110 },
   ];
 
   for (const s of lumbriteSpots) {
@@ -138,22 +163,39 @@ export function generateTestLevel(): LevelData {
     }
   }
 
-  // --- Interactive objects (pixel coords) ---
+  // ══════════════════════════════════════════
+  // INTERACTIVE OBJECTS (pixel coords)
+  // ══════════════════════════════════════════
+  const T = TILE_SIZE;
   const objects: LevelObjectDef[] = [
-    // Steam elevator near the first pillar
-    { type: 'elevator', x: 34 * TILE_SIZE, y: 52 * TILE_SIZE, width: 24, height: 6, travelDistance: 80 },
-    // Ladder on the tall pillar
-    { type: 'ladder', x: 110 * TILE_SIZE, y: 36 * TILE_SIZE, height: 16 * TILE_SIZE },
-    // Rope between platforms
-    { type: 'rope', x: 56 * TILE_SIZE, y: 42 * TILE_SIZE, width: 20 * TILE_SIZE },
+    // --- Ladders: ground ↔ tier 2 ---
+    { type: 'ladder', x: 8 * T, y: 58 * T, height: 18 * T },     // left side
+    { type: 'ladder', x: 98 * T, y: 58 * T, height: 18 * T },    // right side
+
+    // --- Elevator: ground ↔ tier 2 (center) ---
+    { type: 'elevator', x: 52 * T, y: 58 * T, width: 24, height: 6, travelDistance: 18 * T },
+
+    // --- Ladders: tier 2 ↔ tier 3 ---
+    { type: 'ladder', x: 28 * T, y: 38 * T, height: 20 * T },    // left
+    { type: 'ladder', x: 92 * T, y: 38 * T, height: 20 * T },    // right
+
+    // --- Ropes: tier 2 horizontal connections ---
+    { type: 'rope', x: 31 * T, y: 57 * T, width: 9 * T },        // A → B
+    { type: 'rope', x: 97 * T, y: 57 * T, width: 19 * T },       // C → D
+
+    // --- Ropes: tier 3 horizontal connections ---
+    { type: 'rope', x: 45 * T, y: 37 * T, width: 9 * T },        // E → F
+    { type: 'rope', x: 81 * T, y: 37 * T, width: 9 * T },        // F → G
   ];
 
-  // --- NPCs ---
+  // ══════════════════════════════════════════
+  // NPCs
+  // ══════════════════════════════════════════
   const npcs: NPCData[] = [
     {
       name: 'Old Miner Gregor',
-      x: 24 * TILE_SIZE,
-      y: 68 * TILE_SIZE - 14, // stand on platform
+      x: 20 * T,
+      y: 58 * T - 14, // stands on tier 2 platform A
       lines: [
         "You shouldn't be down here, stranger.",
         "The lumbrite... it changes you. I've seen it.",
@@ -164,29 +206,36 @@ export function generateTestLevel(): LevelData {
     },
   ];
 
-  // --- Area lights — permanently lit zones ---
+  // ══════════════════════════════════════════
+  // AREA LIGHTS
+  // ══════════════════════════════════════════
   const lights: LightSource[] = [
-    // Warm torch near spawn area
-    { x: 12 * TILE_SIZE, y: 66 * TILE_SIZE, radius: 50, color: 0xffbb66, intensity: 0.55, flicker: true },
-    // Old gas lamp on first platform
-    { x: 26 * TILE_SIZE, y: 66 * TILE_SIZE, radius: 40, color: 0xeebb77, intensity: 0.45, flicker: true },
-    // Torch on the wide platform
-    { x: 62 * TILE_SIZE, y: 50 * TILE_SIZE, radius: 45, color: 0xffaa55, intensity: 0.5, flicker: true },
-    // Lit area near elevator — steam glow
-    { x: 36 * TILE_SIZE, y: 50 * TILE_SIZE, radius: 35, color: 0xccbbaa, intensity: 0.35,
+    // Ground — torch near spawn
+    { x: 8 * T, y: 74 * T, radius: 50, color: 0xffbb66, intensity: 0.55, flicker: true },
+    // Tier 2 — lamp near Gregor
+    { x: 22 * T, y: 56 * T, radius: 45, color: 0xeebb77, intensity: 0.5, flicker: true },
+    // Tier 2 — steam glow at elevator
+    { x: 54 * T, y: 56 * T, radius: 35, color: 0xccbbaa, intensity: 0.35,
       pulse: { speed: 2.0, amount: 0.15 } },
-    // Large lit section in the middle
-    { x: 80 * TILE_SIZE, y: 62 * TILE_SIZE, radius: 65, color: 0xddcc99, intensity: 0.6, flicker: true },
-    // Reddish glow deep in the cave
-    { x: 120 * TILE_SIZE, y: 55 * TILE_SIZE, radius: 50, color: 0xdd8855, intensity: 0.4,
+    // Tier 2 — lamp on platform C
+    { x: 82 * T, y: 56 * T, radius: 50, color: 0xddcc99, intensity: 0.55, flicker: true },
+    // Tier 2 — torch near right ladder
+    { x: 96 * T, y: 56 * T, radius: 40, color: 0xffaa55, intensity: 0.45, flicker: true },
+    // Tier 3 — warm glow left
+    { x: 34 * T, y: 36 * T, radius: 40, color: 0xdd8855, intensity: 0.4,
       pulse: { speed: 0.8, amount: 0.2 } },
-    // Cold light near ladder
-    { x: 112 * TILE_SIZE, y: 38 * TILE_SIZE, radius: 35, color: 0x99aabb, intensity: 0.4 },
-    // Far-end warm torch
-    { x: 145 * TILE_SIZE, y: 62 * TILE_SIZE, radius: 42, color: 0xffbb66, intensity: 0.45, flicker: true },
+    // Tier 3 — cool light center
+    { x: 66 * T, y: 36 * T, radius: 45, color: 0x99aabb, intensity: 0.45 },
+    // Tier 3 — torch right
+    { x: 108 * T, y: 36 * T, radius: 40, color: 0xffbb66, intensity: 0.4, flicker: true },
+    // Secret area — cool lumbrite glow
+    { x: 58 * T, y: 18 * T, radius: 55, color: 0x6699cc, intensity: 0.5,
+      pulse: { speed: 1.2, amount: 0.15 } },
+    // Right stepping stones
+    { x: 140 * T, y: 64 * T, radius: 35, color: 0xeebb77, intensity: 0.35, flicker: true },
   ];
 
-  const spawn = { x: 10 * TILE_SIZE, y: 68 * TILE_SIZE };
+  const spawn = { x: 8 * T, y: 74 * T };
 
   return {
     tilemap: {

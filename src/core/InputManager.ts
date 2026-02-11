@@ -1,4 +1,4 @@
-export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'interact' | 'menu' | 'map';
+export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'interact' | 'grapple' | 'menu' | 'map';
 
 const DEFAULT_BINDINGS: Record<Action, string[]> = {
   left: ['KeyA', 'ArrowLeft'],
@@ -7,6 +7,7 @@ const DEFAULT_BINDINGS: Record<Action, string[]> = {
   down: ['KeyS', 'ArrowDown'],
   jump: ['Space', 'KeyZ'],
   interact: ['KeyE', 'KeyX'],
+  grapple: ['KeyQ'],
   menu: ['Escape'],
   map: ['Tab', 'KeyM'],
 };

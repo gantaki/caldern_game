@@ -45,3 +45,7 @@ export const COLOR_LUMBRITE_GLOW = 0x6699cc;
 export const INTERACT_RANGE = 20; // pixels — max distance to interact
 export const ELEVATOR_SPEED = 40; // pixels/sec
 export const NPC_INTERACT_RANGE = 24; // pixels
+
+// === Grapple ===
+export const GRAPPLE_SPEED = 130; // pixels/sec — climb speed while grappling
+export const GRAPPLE_RANGE = 96; // pixels — max vertical distance to find a ledge

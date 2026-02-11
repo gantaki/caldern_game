@@ -8,16 +8,24 @@ import {
   JUMP_BUFFER_TIME,
   CLIMB_SPEED,
   ROPE_SPEED,
+  GRAPPLE_SPEED,
 } from '@/config/constants';
 import { type InputManager } from '@/core/InputManager';
 import { approach } from '@/utils/math';
 
-export type PlayerState = 'normal' | 'climbing' | 'rope';
+export type PlayerState = 'normal' | 'climbing' | 'rope' | 'grappling';
 
 export class Player {
   body: Body;
   facingRight = true;
   state: PlayerState = 'normal';
+
+  /** Target Y pixel position for grapple (player body.y when landed) */
+  grappleTargetY = 0;
+  /** X pixel position of the grapple attachment point (top of ledge) */
+  grappleAnchorX = 0;
+  /** Y pixel position of the grapple anchor (top of ledge) */
+  grappleAnchorY = 0;
 
   private coyoteTimer = 0;
   private jumpBufferTimer = 0;
@@ -36,6 +44,9 @@ export class Player {
         break;
       case 'rope':
         this.updateRope(input);
+        break;
+      case 'grappling':
+        this.updateGrappling(dt);
         break;
     }
   }
@@ -109,6 +120,21 @@ export class Player {
     }
   }
 
+  private updateGrappling(dt: number): void {
+    // Move upward toward the grapple target
+    this.body.vx = 0;
+    this.body.vy = -GRAPPLE_SPEED;
+    this.body.y += this.body.vy * dt;
+
+    // Reached the target — land on the ledge
+    if (this.body.y <= this.grappleTargetY) {
+      this.body.y = this.grappleTargetY;
+      this.body.vy = 0;
+      this.body.onGround = true;
+      this.state = 'normal';
+    }
+  }
+
   startClimbing(): void {
     if (this.state === 'climbing') return;
     this.state = 'climbing';
@@ -121,5 +147,14 @@ export class Player {
     this.state = 'rope';
     this.body.vx = 0;
     this.body.vy = 0;
+  }
+
+  startGrapple(targetY: number, anchorX: number, anchorY: number): void {
+    this.state = 'grappling';
+    this.body.vx = 0;
+    this.body.vy = 0;
+    this.grappleTargetY = targetY;
+    this.grappleAnchorX = anchorX;
+    this.grappleAnchorY = anchorY;
   }
 }

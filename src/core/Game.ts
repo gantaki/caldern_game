@@ -17,6 +17,8 @@ import {
   LUMBRITE_LIGHT_RADIUS,
   LUMBRITE_LIGHT_COLOR,
   PLAYER_SPEED,
+  GRAPPLE_RANGE,
+  PLAYER_HEIGHT,
 } from '@/config/constants';
 import { Camera } from './Camera';
 import { InputManager } from './InputManager';
@@ -218,10 +220,17 @@ export class Game {
       this.handleObjectInteractions();
       this.handleNPCInteractions();
 
+      // Grapple initiation (Q key)
+      if (this.input.isPressed('grapple') && this.player.state === 'normal') {
+        this.tryGrapple();
+      }
+
       this.player.update(this.input, dt);
 
       if (this.player.state === 'normal') {
         resolveBodyTilemap(this.player.body, this.tileMap, dt);
+      } else if (this.player.state === 'grappling') {
+        // Grapple movement handled entirely in Player.updateGrappling
       } else {
         // On ladder/rope: apply velocity directly, no gravity
         this.player.body.x += this.player.body.vx * dt;
@@ -296,6 +305,50 @@ export class Game {
       if (npc.inRange(this.player.body)) {
         const { name, text } = npc.interact();
         this.dialogue.show(name, text);
+        return;
+      }
+    }
+  }
+
+  /**
+   * Scan for a ledge above the player that the grappling rope can hook onto.
+   * Checks the facing-direction column and the player's own column for a
+   * solid tile with air above it (= a surface to stand on).
+   */
+  private tryGrapple(): void {
+    const body = this.player.body;
+    const centerTx = Math.floor(body.centerX / TILE_SIZE);
+    const headTy = Math.floor(body.top / TILE_SIZE);
+    const dir = this.player.facingRight ? 1 : -1;
+    const maxTiles = Math.ceil(GRAPPLE_RANGE / TILE_SIZE);
+    const tilesForPlayer = Math.ceil(PLAYER_HEIGHT / TILE_SIZE);
+
+    for (let offset = 1; offset <= maxTiles; offset++) {
+      const scanTy = headTy - offset;
+      if (scanTy < 1) break;
+
+      // Path must be clear in the player's column
+      if (this.tileMap.isSolid(centerTx, scanTy)) break;
+
+      // Check facing side first, then player's own column
+      for (const checkTx of [centerTx + dir, centerTx]) {
+        if (!this.tileMap.isSolid(checkTx, scanTy)) continue;
+        if (this.tileMap.isSolid(checkTx, scanTy - 1)) continue;
+
+        // Ledge found: solid at scanTy, air at scanTy-1.
+        // Verify enough room above the ledge for the player body.
+        let hasRoom = true;
+        for (let i = 1; i <= tilesForPlayer; i++) {
+          if (this.tileMap.isSolid(checkTx, scanTy - i)) { hasRoom = false; break; }
+        }
+        if (!hasRoom) continue;
+
+        const targetY = scanTy * TILE_SIZE - body.height;
+        const anchorX = checkTx === centerTx
+          ? checkTx * TILE_SIZE + TILE_SIZE / 2
+          : checkTx * TILE_SIZE + (dir > 0 ? 0 : TILE_SIZE);
+        const anchorY = scanTy * TILE_SIZE;
+        this.player.startGrapple(targetY, anchorX, anchorY);
         return;
       }
     }
@@ -409,6 +462,23 @@ export class Game {
     gfx.rect(lanternX + 1, lanternY + 1, 1, 2).fill(flameColor);
     // Lantern glow (small bright dot)
     gfx.rect(lanternX + 1, lanternY + 1, 1, 1).fill(0xffeeaa);
+
+    // Grapple rope visual
+    if (this.player.state === 'grappling') {
+      const ax = Math.floor(this.player.grappleAnchorX);
+      const ay = Math.floor(this.player.grappleAnchorY);
+      const ropeLen = py - ay;
+      if (ropeLen > 0) {
+        // Rope line
+        gfx.rect(ax, ay, 1, ropeLen).fill(0x998866);
+        // Rope highlight
+        gfx.rect(ax, ay, 1, Math.min(ropeLen, 3)).fill(0xbbaa88);
+      }
+      // Grapple hook
+      gfx.rect(ax - 1, ay - 2, 3, 2).fill(0x777766);
+      gfx.rect(ax - 2, ay - 1, 1, 2).fill(0x666655); // left prong
+      gfx.rect(ax + 2, ay - 1, 1, 2).fill(0x666655); // right prong
+    }
   }
 
   private renderParticles(): void {
@@ -516,7 +586,6 @@ export class Game {
   }
 
   private drawLight(x: number, y: number, radius: number, color: number, intensity: number): void {
-    // Compute base from actual ambient to prevent halo mismatch
     const baseR = Math.floor(AMBIENT_DARKNESS * 20) / 255;
     const baseG = Math.floor(AMBIENT_DARKNESS * 18) / 255;
     const baseB = Math.floor(AMBIENT_DARKNESS * 25) / 255;
@@ -525,19 +594,17 @@ export class Game {
     const cg = ((color >> 8) & 0xff) / 255;
     const cb = (color & 0xff) / 255;
 
-    // More steps for smoother gradient, cubic falloff for softer edge
-    const steps = 10;
+    const steps = 6;
     for (let i = steps; i >= 0; i--) {
       const t = i / steps;
       const r = radius * t;
       const alpha = intensity * (1 - t * t * t);
 
-      const lr = Math.min(255, Math.floor((baseR + cr * alpha) * 255));
-      const lg = Math.min(255, Math.floor((baseG + cg * alpha) * 255));
-      const lb = Math.min(255, Math.floor((baseB + cb * alpha) * 255));
+      const lr = Math.min(255, (baseR + cr * alpha) * 255) | 0;
+      const lg = Math.min(255, (baseG + cg * alpha) * 255) | 0;
+      const lb = Math.min(255, (baseB + cb * alpha) * 255) | 0;
 
-      const lightColor = (lr << 16) | (lg << 8) | lb;
-      this.lightingGraphics.circle(x, y, Math.max(r, 1)).fill(lightColor);
+      this.lightingGraphics.circle(x, y, Math.max(r, 1)).fill((lr << 16) | (lg << 8) | lb);
     }
   }
 
@@ -557,7 +624,7 @@ export class Game {
     const camY = this.camera.viewY;
 
     // Cap particles
-    if (this.particles.count > 200) return;
+    if (this.particles.count > 80) return;
 
     // Dust motes — slow floating particles in air
     this.dustTimer += dt;
